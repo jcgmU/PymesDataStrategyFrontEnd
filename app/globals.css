@@ -1,26 +1,135 @@
 @import "tailwindcss";
 
+/* ==========================================================================
+   Neo-Brutalism Soft UI - Design System
+   Paleta Compensar + Brutal shadows
+   ========================================================================== */
+
+@theme {
+  /* Typography */
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", monospace;
+
+  /* Primary Colors - Compensar Palette (OKLCH) */
+  --color-primary: oklch(65% 0.22 35);
+  --color-primary-hover: oklch(60% 0.22 35);
+  --color-primary-active: oklch(55% 0.22 35);
+  
+  --color-secondary: oklch(27% 0.12 264);
+  --color-secondary-hover: oklch(32% 0.12 264);
+  --color-secondary-active: oklch(22% 0.12 264);
+
+  /* Background & Surface */
+  --color-background: oklch(98% 0 0);
+  --color-surface: #ffffff;
+  --color-surface-elevated: #ffffff;
+
+  /* Text */
+  --color-text: oklch(15% 0 0);
+  --color-text-muted: oklch(55% 0.02 250);
+  --color-text-inverted: #ffffff;
+
+  /* Semantic Colors */
+  --color-success: oklch(72% 0.19 145);
+  --color-success-hover: oklch(67% 0.19 145);
+  --color-warning: oklch(75% 0.18 70);
+  --color-warning-hover: oklch(70% 0.18 70);
+  --color-error: oklch(63% 0.22 25);
+  --color-error-hover: oklch(58% 0.22 25);
+
+  /* Borders */
+  --color-border: #000000;
+  --color-border-muted: oklch(80% 0 0);
+
+}
+
+/* Spacing & Radius tokens — outside @theme to avoid overriding Tailwind's
+   built-in utility scales (max-w-lg, rounded-lg, gap-lg, etc.) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+
+  --radius-none: 0;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-full: 9999px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ==========================================================================
+   Neo-Brutalism Shadows (CSS Custom Properties)
+   ========================================================================== */
+:root {
+  --shadow-brutal: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+  --shadow-brutal-sm: 2px 2px 0px 0px rgba(0, 0, 0, 1);
+  --shadow-brutal-hover: 2px 2px 0px 0px rgba(0, 0, 0, 1);
+  --shadow-brutal-lg: 6px 6px 0px 0px rgba(0, 0, 0, 1);
+  --shadow-brutal-primary: 4px 4px 0px 0px oklch(65% 0.22 35);
+  --shadow-brutal-secondary: 4px 4px 0px 0px oklch(27% 0.12 264);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ==========================================================================
+   Base Styles
+   ========================================================================== */
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==========================================================================
+   Neo-Brutalism Utility Classes
+   ========================================================================== */
+.shadow-brutal {
+  box-shadow: var(--shadow-brutal);
+}
+
+.shadow-brutal-sm {
+  box-shadow: var(--shadow-brutal-sm);
+}
+
+.shadow-brutal-lg {
+  box-shadow: var(--shadow-brutal-lg);
+}
+
+.shadow-brutal-primary {
+  box-shadow: var(--shadow-brutal-primary);
+}
+
+.shadow-brutal-secondary {
+  box-shadow: var(--shadow-brutal-secondary);
+}
+
+/* Hover transition for brutal shadow effect */
+.brutal-hover {
+  transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+}
+
+.brutal-hover:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-brutal-lg);
+}
+
+.brutal-hover:active {
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-brutal-sm);
+}
+
+/* Neo-Brutalism border style */
+.border-brutal {
+  border: 2px solid var(--color-border);
+}
+
+.border-brutal-thick {
+  border: 3px solid var(--color-border);
 }
