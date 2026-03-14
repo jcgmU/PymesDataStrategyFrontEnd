@@ -4,6 +4,7 @@ import { Check, X, PenTool, CheckCircle2 } from "lucide-react";
 import { useReviewStore } from "@/store";
 import { ANOMALY_TYPE, REVIEW_ACTION } from "@/types";
 import type { Anomaly, AnomalyType } from "@/types";
+import { Card } from "@/components/ui/Card";
 
 const ANOMALY_DESCRIPTIONS: Record<AnomalyType, (rows: number) => string> = {
   [ANOMALY_TYPE.FILL_NULLS]: (rows) =>
@@ -55,8 +56,8 @@ export function AnomalyCard({ anomaly }: AnomalyCardProps) {
   };
 
   return (
-    <div
-      className={`bg-white border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-6 flex flex-col transition-all ${!isPending ? "opacity-60 bg-gray-50" : ""}`}
+    <Card
+      className={`bg-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-6 flex flex-col transition-all${!isPending ? " opacity-60 bg-gray-50" : ""}`}
     >
       {/* Header con badge de columna */}
       <div className="flex justify-between items-start mb-4">
@@ -114,6 +115,6 @@ export function AnomalyCard({ anomaly }: AnomalyCardProps) {
           </button>
         </div>
       )}
-    </div>
+    </Card>
   );
 }

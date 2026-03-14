@@ -6,13 +6,11 @@ import { DATASET_STATUS } from '@/types/dataset'
 const createMockDataset = (overrides: Partial<Dataset> = {}): Dataset => ({
   id: 'ds-1',
   name: 'Test Dataset',
-  originalName: 'test.csv',
-  rowCount: 100,
-  columnCount: 5,
-  fileSize: 1024,
+  originalFileName: 'test.csv',
+  fileSizeBytes: 1024,
+  mimeType: 'text/csv',
+  userId: 'user-001',
   status: DATASET_STATUS.PENDING,
-  progress: 0,
-  anomalyCount: 0,
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
   ...overrides,
@@ -151,10 +149,10 @@ describe('useAppStore', () => {
 
     it('should update status filter', () => {
       // Act
-      useAppStore.getState().setFilter({ status: DATASET_STATUS.COMPLETED })
+      useAppStore.getState().setFilter({ status: DATASET_STATUS.READY })
 
       // Assert
-      expect(useAppStore.getState().filter.status).toBe(DATASET_STATUS.COMPLETED)
+      expect(useAppStore.getState().filter.status).toBe(DATASET_STATUS.READY)
       expect(useAppStore.getState().filter.search).toBe('')
     })
   })
@@ -164,7 +162,7 @@ describe('useAppStore', () => {
       // Arrange
       const datasets = [
         createMockDataset({ id: 'ds-1', status: DATASET_STATUS.PENDING }),
-        createMockDataset({ id: 'ds-2', status: DATASET_STATUS.COMPLETED }),
+        createMockDataset({ id: 'ds-2', status: DATASET_STATUS.READY }),
         createMockDataset({ id: 'ds-3', status: DATASET_STATUS.PENDING }),
       ]
       useAppStore.setState({ 
@@ -183,9 +181,9 @@ describe('useAppStore', () => {
     it('should filter by search (case insensitive)', () => {
       // Arrange
       const datasets = [
-        createMockDataset({ id: 'ds-1', name: 'Sales Report', originalName: 'sales.csv' }),
-        createMockDataset({ id: 'ds-2', name: 'User Data', originalName: 'users.csv' }),
-        createMockDataset({ id: 'ds-3', name: 'Revenue', originalName: 'revenue_sales.xlsx' }),
+        createMockDataset({ id: 'ds-1', name: 'Sales Report', originalFileName: 'sales.csv' }),
+        createMockDataset({ id: 'ds-2', name: 'User Data', originalFileName: 'users.csv' }),
+        createMockDataset({ id: 'ds-3', name: 'Revenue', originalFileName: 'revenue_sales.xlsx' }),
       ]
       useAppStore.setState({ 
         datasets, 
@@ -205,7 +203,7 @@ describe('useAppStore', () => {
       // Arrange
       const datasets = [
         createMockDataset({ id: 'ds-1', status: DATASET_STATUS.PENDING }),
-        createMockDataset({ id: 'ds-2', status: DATASET_STATUS.COMPLETED }),
+        createMockDataset({ id: 'ds-2', status: DATASET_STATUS.READY }),
       ]
       useAppStore.setState({ 
         datasets, 

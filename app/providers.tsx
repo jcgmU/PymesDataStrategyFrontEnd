@@ -2,6 +2,8 @@
 
 import { useState, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { SessionProvider } from "next-auth/react";
+import { Toaster } from "sonner";
 
 function makeQueryClient(): QueryClient {
   return new QueryClient({
@@ -38,6 +40,11 @@ export function Providers({ children }: ProvidersProps) {
   const [queryClient] = useState(() => getQueryClient());
 
   return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <SessionProvider>
+      <QueryClientProvider client={queryClient}>
+        {children}
+        <Toaster richColors position="top-right" />
+      </QueryClientProvider>
+    </SessionProvider>
   );
 }

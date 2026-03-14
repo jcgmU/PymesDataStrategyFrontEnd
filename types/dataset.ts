@@ -1,9 +1,12 @@
+// Dataset types — aligned with backend (source of truth)
+// Backend statuses: PENDING | PROCESSING | READY | ERROR | ARCHIVED
+
 export const DATASET_STATUS = {
   PENDING: "PENDING",
   PROCESSING: "PROCESSING",
-  AWAITING_REVIEW: "AWAITING_REVIEW",
-  COMPLETED: "COMPLETED",
-  FAILED: "FAILED",
+  READY: "READY",
+  ERROR: "ERROR",
+  ARCHIVED: "ARCHIVED",
 } as const;
 
 export type DatasetStatus =
@@ -12,13 +15,16 @@ export type DatasetStatus =
 export interface Dataset {
   id: string;
   name: string;
-  originalName: string;
-  rowCount: number;
-  columnCount: number;
-  fileSize: number;
+  originalFileName: string;
   status: DatasetStatus;
-  progress: number;
-  anomalyCount: number;
+  description?: string;
+  storageKey?: string;
+  fileSizeBytes: number;
+  mimeType: string;
+  userId: string;
+  schema?: unknown;
+  metadata?: Record<string, unknown>;
+  statistics?: unknown;
   createdAt: string;
   updatedAt: string;
 }

@@ -1,9 +1,10 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { LayoutDashboard, Settings, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 
 interface NavItem {
   label: string;
@@ -18,17 +19,13 @@ const navItems: NavItem[] = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
+  const { logout } = useAuth();
 
   const isActive = (href: string) => {
     if (href === "/dashboard") {
       return pathname === "/dashboard" || pathname.startsWith("/dashboard/review");
     }
     return pathname.startsWith(href);
-  };
-
-  const handleLogout = () => {
-    router.push("/");
   };
 
   return (
@@ -71,7 +68,7 @@ export function Sidebar() {
       {/* Cerrar Sesión */}
       <div className="p-4 border-t-4 border-black">
         <button
-          onClick={handleLogout}
+          onClick={logout}
           className="w-full flex items-center gap-3 font-bold px-4 py-3 border-2 border-black bg-white hover:bg-red-50 text-red-600 transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1"
         >
           <LogOut className="w-5 h-5" />

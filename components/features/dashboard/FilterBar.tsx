@@ -10,9 +10,9 @@ const statusOptions: { value: DatasetStatus | "ALL"; label: string }[] = [
   { value: "ALL", label: "Todos los estados" },
   { value: DATASET_STATUS.PENDING, label: "Pendiente" },
   { value: DATASET_STATUS.PROCESSING, label: "Procesando" },
-  { value: DATASET_STATUS.AWAITING_REVIEW, label: "En revisión" },
-  { value: DATASET_STATUS.COMPLETED, label: "Completado" },
-  { value: DATASET_STATUS.FAILED, label: "Error" },
+  { value: DATASET_STATUS.READY, label: "Listo" },
+  { value: DATASET_STATUS.ERROR, label: "Error" },
+  { value: DATASET_STATUS.ARCHIVED, label: "Archivado" },
 ];
 
 export function FilterBar() {

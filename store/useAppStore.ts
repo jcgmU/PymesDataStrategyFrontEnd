@@ -95,7 +95,7 @@ export const useAppStore = create<AppState>()(
         const matchesSearch =
           filter.search === "" ||
           dataset.name.toLowerCase().includes(filter.search.toLowerCase()) ||
-          dataset.originalName
+          dataset.originalFileName
             .toLowerCase()
             .includes(filter.search.toLowerCase());
         return matchesStatus && matchesSearch;

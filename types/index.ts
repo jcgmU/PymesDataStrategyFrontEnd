@@ -11,3 +11,14 @@ export {
   type ReviewAction,
   type Anomaly,
 } from "./anomaly";
+
+export type {
+  TransformationType,
+  JobStatus,
+  TransformDatasetDto,
+  ApiDataset,
+  UploadDatasetResponse,
+  ApiJob,
+  ApiError,
+  ApiListResponse,
+} from "./api";

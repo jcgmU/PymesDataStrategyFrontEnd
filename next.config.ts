@@ -29,7 +29,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       "font-src 'self' data:",
-      "connect-src 'self' http://localhost:* ws://localhost:*",
+      "connect-src 'self' http://localhost:* ws://localhost:* http://api:3000",
       "frame-ancestors 'none'",
     ].join('; ')
   }
@@ -41,6 +41,15 @@ const nextConfig: NextConfig = {
       {
         source: '/:path*',
         headers: securityHeaders,
+      },
+    ]
+  },
+  async rewrites() {
+    const apiUrl = process.env.INTERNAL_API_URL ?? 'http://localhost:3000'
+    return [
+      {
+        source: '/api/v1/:path*',
+        destination: `${apiUrl}/api/v1/:path*`,
       },
     ]
   },

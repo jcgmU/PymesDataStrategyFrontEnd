@@ -6,20 +6,18 @@ import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { useReviewStore } from "@/store";
-import { submitAllDecisions } from "@/services";
-import { REVIEW_ACTION } from "@/types";
 import type { Dataset } from "@/types";
 
 interface ReviewHeaderProps {
   dataset: Dataset;
+  onSubmit: () => void | Promise<void>;
 }
 
-export function ReviewHeader({ dataset }: ReviewHeaderProps) {
+export function ReviewHeader({ dataset, onSubmit }: ReviewHeaderProps) {
   const router = useRouter();
 
-  const { anomalies, getProgress, isSubmitting } = useReviewStore(
+  const { getProgress, isSubmitting } = useReviewStore(
     useShallow((state) => ({
-      anomalies: state.anomalies,
       getProgress: state.getProgress,
       isSubmitting: state.isSubmitting,
     }))
@@ -27,29 +25,6 @@ export function ReviewHeader({ dataset }: ReviewHeaderProps) {
 
   const progress = getProgress();
   const allResolved = progress.resolved === progress.total && progress.total > 0;
-
-  const handleSubmit = async () => {
-    const decisions = anomalies
-      .filter((a) => a.action !== REVIEW_ACTION.PENDING)
-      .map((a) => ({
-        anomalyId: a.id,
-        action: a.action,
-        correction: a.userCorrection,
-      }));
-
-    if (decisions.length === 0) return;
-
-    useReviewStore.setState({ isSubmitting: true });
-
-    try {
-      await submitAllDecisions(decisions);
-      router.push("/dashboard");
-    } catch (error) {
-      console.error("Error submitting decisions:", error);
-    } finally {
-      useReviewStore.setState({ isSubmitting: false });
-    }
-  };
 
   const handleBack = () => {
     router.push("/dashboard");
@@ -87,7 +62,7 @@ export function ReviewHeader({ dataset }: ReviewHeaderProps) {
           {/* Submit button */}
           <Button
             variant="primary"
-            onClick={handleSubmit}
+            onClick={onSubmit}
             disabled={!allResolved}
             loading={isSubmitting}
           >

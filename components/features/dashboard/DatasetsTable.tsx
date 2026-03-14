@@ -3,9 +3,9 @@
 import { useShallow } from "zustand/react/shallow";
 import { useRouter } from "next/navigation";
 import { Eye, Download, Trash2 } from "lucide-react";
-import { Button, Badge, ProgressBar } from "@/components/ui";
+import { Button, Badge } from "@/components/ui";
 import { useAppStore } from "@/store";
-import { deleteDataset } from "@/services";
+import { useDeleteDataset } from "@/hooks/api";
 import { DATASET_STATUS, type DatasetStatus } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -15,9 +15,9 @@ const statusConfig: Record<
 > = {
   [DATASET_STATUS.PENDING]: { label: "Pendiente", variant: "default" },
   [DATASET_STATUS.PROCESSING]: { label: "Procesando", variant: "info" },
-  [DATASET_STATUS.AWAITING_REVIEW]: { label: "En revisión", variant: "warning" },
-  [DATASET_STATUS.COMPLETED]: { label: "Completado", variant: "success" },
-  [DATASET_STATUS.FAILED]: { label: "Error", variant: "error" },
+  [DATASET_STATUS.READY]: { label: "Listo", variant: "success" },
+  [DATASET_STATUS.ERROR]: { label: "Error", variant: "error" },
+  [DATASET_STATUS.ARCHIVED]: { label: "Archivado", variant: "default" },
 };
 
 function formatFileSize(bytes: number): string {
@@ -28,11 +28,11 @@ function formatFileSize(bytes: number): string {
 
 export function DatasetsTable() {
   const router = useRouter();
+  const deleteDatasetMutation = useDeleteDataset();
 
-  const { getFilteredDatasets, removeDataset } = useAppStore(
+  const { getFilteredDatasets } = useAppStore(
     useShallow((state) => ({
       getFilteredDatasets: state.getFilteredDatasets,
-      removeDataset: state.removeDataset,
     }))
   );
 
@@ -42,18 +42,18 @@ export function DatasetsTable() {
     router.push(`/dashboard/review/${id}`);
   };
 
-  const handleDownload = (id: string) => {
-    // TODO: Implement download functionality
-    console.log("Download dataset:", id);
+  const handleDownload = async (id: string) => {
+    const res = await fetch(`/api/v1/datasets/${id}/download`, {
+      headers: { "x-user-id": "user-001" },
+    });
+    if (res.ok) {
+      const { data } = await res.json();
+      window.open(data.url, "_blank");
+    }
   };
 
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteDataset(id);
-      removeDataset(id);
-    } catch (error) {
-      console.error("Error deleting dataset:", error);
-    }
+  const handleDelete = (id: string) => {
+    deleteDatasetMutation.mutate(id);
   };
 
   if (datasets.length === 0) {
@@ -70,9 +70,8 @@ export function DatasetsTable() {
         <thead>
           <tr className="bg-surface border-b-2 border-black">
             <th className="px-4 py-3 text-left font-bold text-text">Nombre</th>
-            <th className="px-4 py-3 text-left font-bold text-text">Filas</th>
+            <th className="px-4 py-3 text-left font-bold text-text">Tamaño</th>
             <th className="px-4 py-3 text-left font-bold text-text">Estado</th>
-            <th className="px-4 py-3 text-left font-bold text-text">Progreso</th>
             <th className="px-4 py-3 text-right font-bold text-text">Acciones</th>
           </tr>
         </thead>
@@ -93,38 +92,29 @@ export function DatasetsTable() {
                   <div>
                     <p className="font-semibold text-text">{dataset.name}</p>
                     <p className="text-xs text-text-muted">
-                      {dataset.originalName} · {formatFileSize(dataset.fileSize)}
+                      {dataset.originalFileName}
                     </p>
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <span className="text-text">{dataset.rowCount.toLocaleString()}</span>
+                  <span className="text-text">{formatFileSize(dataset.fileSizeBytes)}</span>
                 </td>
                 <td className="px-4 py-3">
                   <Badge variant={config.variant}>{config.label}</Badge>
                 </td>
-                <td className="px-4 py-3 w-32">
-                  {dataset.status === DATASET_STATUS.PROCESSING ? (
-                    <ProgressBar value={dataset.progress} size="sm" />
-                  ) : (
-                    <span className="text-sm text-text-muted">
-                      {dataset.progress}%
-                    </span>
-                  )}
-                </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-end gap-2">
-                    {dataset.status === DATASET_STATUS.AWAITING_REVIEW && (
+                    {dataset.status === DATASET_STATUS.PROCESSING && (
                       <Button
                         variant="primary"
                         size="sm"
                         onClick={() => handleReview(dataset.id)}
                       >
                         <Eye className="h-4 w-4 mr-1" />
-                        Revisar
+                        Ver Detalle
                       </Button>
                     )}
-                    {dataset.status === DATASET_STATUS.COMPLETED && (
+                    {dataset.status === DATASET_STATUS.READY && (
                       <Button
                         variant="secondary"
                         size="sm"
@@ -138,6 +128,7 @@ export function DatasetsTable() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleDelete(dataset.id)}
+                      disabled={deleteDatasetMutation.isPending}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

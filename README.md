@@ -4,8 +4,9 @@
 > Plataforma ETL con IA y Human-in-the-Loop para PYMES en Bogotá, Colombia.
 
 ![Estado](https://img.shields.io/badge/Fase%201-MVP%20COMPLETADO-brightgreen)
-![Tests](https://img.shields.io/badge/tests-82%20pasando-brightgreen)
-![Next.js](https://img.shields.io/badge/Next.js-15.1.6-black)
+![Tests](https://img.shields.io/badge/tests-197%20pasando-brightgreen)
+![E2E](https://img.shields.io/badge/E2E-4%20specs%20Playwright-blue)
+![Next.js](https://img.shields.io/badge/Next.js-15-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)
 ![Licencia](https://img.shields.io/badge/licencia-MIT-blue)
 
@@ -56,7 +57,7 @@ La plataforma permite a las PYMES cargar, transformar y analizar sus datos empre
 │  ┌─────────────────────────────────────────────────┐    │
 │  │              Estado Global                      │    │
 │  │   Zustand v5 (stores/)  +  React Query v5       │    │
-│  │              (services/)                        │    │
+│  │              (hooks/api/)                       │    │
 │  └─────────────────────────────────────────────────┘    │
 └─────────────────────────────────────────────────────────┘
 ```
@@ -67,15 +68,19 @@ La plataforma permite a las PYMES cargar, transformar y analizar sus datos empre
 
 | Tecnología | Versión | Uso |
 |---|---|---|
-| **Next.js** | 15.1.6 | Framework React con App Router |
+| **Next.js** | 15 (App Router) | Framework React con App Router |
 | **React** | 19 | UI Library |
 | **TypeScript** | Estricto | Tipado estático |
 | **Tailwind CSS** | v4 | Estilos CSS-first (sin `tailwind.config.ts`) |
 | **Zustand** | v5 | Estado global |
 | **React Query** | v5 | Data fetching y caché del servidor |
+| **NextAuth** | v5 (beta) | Autenticación — credentials provider |
+| **Zod** | v4 | Validación de esquemas (frontend) |
+| **recharts** | v3 | Gráficos del dashboard de analítica |
+| **sonner** | v2 | Toast notifications |
 | **lucide-react** | Latest | Sistema de iconos |
-| **Vitest** | Latest | Unit testing |
-| **Playwright** | Latest | E2E testing |
+| **Vitest** | v4 | Unit testing (197 tests) |
+| **Playwright** | Latest | E2E testing (4 specs) |
 | **pnpm** | — | Gestor de paquetes |
 
 ---
@@ -135,8 +140,9 @@ frontend/
 │   │       ├── FinalCTA.tsx
 │   │       └── LandingFooter.tsx
 │   └── ui/                           # Componentes reutilizables (BrutalButton, BrutalCard…)
+├── hooks/
+│   └── api/                          # React Query hooks (useDatasets, useAnomalies, etc.)
 ├── stores/                           # Zustand stores
-├── services/                         # API services (React Query hooks)
 ├── types/                            # TypeScript types compartidos
 ├── __tests__/                        # Unit tests (Vitest)
 ├── e2e/                              # E2E tests (Playwright)
@@ -147,6 +153,18 @@ frontend/
 ---
 
 ## ✅ Funcionalidades Implementadas
+
+Todas las funcionalidades de la Fase 1 están completadas:
+
+| # | Funcionalidad | Estado |
+|---|---|---|
+| 1 | Login con NextAuth credentials provider | ✅ |
+| 2 | Dashboard con lista de datasets y carga de archivos | ✅ |
+| 3 | Gestión de jobs con actualizaciones en tiempo real (SSE) | ✅ |
+| 4 | Revisión Human-in-the-Loop (anomalía → aprobar/corregir/descartar) | ✅ |
+| 5 | Dashboard de analítica con gráficos (recharts) | ✅ |
+| 6 | Página de configuración (Settings) | ✅ |
+| 7 | Toast notifications (sonner) | ✅ |
 
 ### Landing Page
 Landing pública con 12 secciones que comunican la propuesta de valor de la plataforma:
@@ -170,7 +188,10 @@ Landing pública con 12 secciones que comunican la propuesta de valor de la plat
 - **Layout con Sidebar** — Navegación lateral persistente entre secciones.
 - **Home Dashboard** — Vista general con métricas del sistema.
 - **Gestión de Datasets** — Lista de datasets cargados y subida de nuevos archivos.
-- **Revisión Human-in-the-Loop** — Pantalla de revisión de transformaciones sugeridas por la IA, con flujo de aprobación o rechazo por parte del analista humano.
+- **Job Management** — Gestión de trabajos ETL con estado en tiempo real vía SSE.
+- **Revisión Human-in-the-Loop** — Revisión de anomalías detectadas por la IA: el analista aprueba, corrige o descarta cada sugerencia antes de aplicarla.
+- **Analytics Dashboard** — Gráficos de métricas e indicadores clave (recharts).
+- **Settings** — Página de configuración de la plataforma.
 
 ---
 
@@ -209,9 +230,11 @@ La aplicación estará disponible en **http://localhost:3001**.
 | `pnpm dev` | Inicia el servidor de desarrollo en el puerto 3001 |
 | `pnpm build` | Genera el build de producción |
 | `pnpm start` | Inicia el servidor en modo producción |
-| `pnpm test` | Ejecuta los 82 unit tests con Vitest |
+| `pnpm test` | Ejecuta los 197 unit tests con Vitest |
+| `pnpm test:coverage` | Unit tests con reporte de cobertura |
+| `pnpm test:e2e` | Playwright E2E (requiere stack corriendo) |
+| `pnpm test:e2e:ui` | Playwright con interfaz gráfica |
 | `pnpm lint` | Verifica el código con ESLint |
-| `pnpm typecheck` | Verifica los tipos TypeScript |
 
 ---
 
@@ -220,32 +243,61 @@ La aplicación estará disponible en **http://localhost:3001**.
 Crear un archivo `.env.local` en la raíz del proyecto con las siguientes variables:
 
 ```env
-# URL base del backend API
+NEXTAUTH_URL=http://localhost:3001
+NEXTAUTH_SECRET=<secret-generado>
 NEXT_PUBLIC_API_URL=http://localhost:3000
+INTERNAL_API_URL=http://pymes-api:3000   # Red interna Docker
 ```
 
-| Variable | Valor por defecto | Descripción |
-|---|---|---|
-| `NEXT_PUBLIC_API_URL` | `http://localhost:3000` | URL base del backend REST API |
+| Variable | Descripción |
+|---|---|
+| `NEXTAUTH_URL` | URL pública del frontend (NextAuth callback) |
+| `NEXTAUTH_SECRET` | Secreto para firmar sesiones de NextAuth |
+| `NEXT_PUBLIC_API_URL` | URL del backend REST API (accesible desde el browser) |
+| `INTERNAL_API_URL` | URL del backend en la red Docker (Server Components / SSR) |
 
 ---
 
 ## 🧪 Tests
 
-El proyecto cuenta con **82 unit tests** que cubren los componentes principales de la interfaz.
+### Unit Tests (Vitest + React Testing Library)
+
+El proyecto cuenta con **197 unit tests** que cubren los componentes y stores principales.
 
 ```bash
-# Ejecutar todos los tests
+# Ejecutar todos los unit tests
 pnpm test
 
 # Ejecutar en modo watch
-pnpm test --watch
+pnpm test:watch
 
 # Ver cobertura
-pnpm test --coverage
+pnpm test:coverage
 ```
 
-Los tests están ubicados en el directorio `__tests__/` y utilizan **Vitest** con **React Testing Library**.
+Los tests están en `__tests__/` y utilizan **Vitest** con **React Testing Library**.
+
+### E2E Tests (Playwright)
+
+4 specs de integración end-to-end ubicadas en `e2e/`:
+
+| Spec | Descripción |
+|---|---|
+| `landing.spec.ts` | Landing page pública |
+| `dashboard.spec.ts` | Dashboard principal |
+| `review.spec.ts` | Revisión Human-in-the-Loop |
+| `security.spec.ts` | Seguridad y autenticación |
+
+```bash
+# Requiere stack completo corriendo (make up desde backend/)
+pnpm test:e2e
+
+# Con interfaz gráfica
+pnpm test:e2e:ui
+
+# Modo debug
+pnpm test:e2e:debug
+```
 
 ---
 
@@ -257,24 +309,45 @@ El frontend consume la API REST del backend mediante **React Query v5**.
 |---|---|
 | **Backend URL** | `http://localhost:3000` |
 | **Frontend URL** | `http://localhost:3001` |
-| **Protocolo** | REST / JSON |
-| **Auth** | *(Fase 2 — JWT)* |
+| **Protocolo** | REST / JSON + SSE (Server-Sent Events para estado de jobs) |
+| **Auth** | NextAuth v5 — credentials provider |
 
-Los servicios de API están organizados en `services/` como custom hooks de React Query, manteniendo la lógica de fetching separada de los componentes.
+Los hooks de API están organizados en `hooks/api/` como custom hooks de React Query. Cada hook lee el token de autenticación directamente desde `useSession()` de NextAuth, por lo que los componentes los invocan sin pasar parámetros de token:
+
+```typescript
+// ✅ Correcto — el hook obtiene el token internamente
+const { data: datasets } = useDatasets()
+
+// ❌ Incorrecto — no es necesario pasar el token externamente
+const { data: datasets } = useDatasets(token)
+```
 
 **Repositorio del backend:** https://github.com/jcgmU/PymesDataStrategyBackEnd.git
 
 ---
 
+## 🐳 Docker
+
+El stack completo se levanta desde el directorio `backend/` (raíz del monorepo donde vive el `docker-compose.yml`):
+
+```bash
+# Desde backend/ — levanta los 7 servicios incluyendo frontend en :3001
+make up
+
+# Ver logs del frontend
+make logs-frontend
+```
+
+Los 7 servicios incluyen: API Gateway Express, frontend Next.js, Worker ETL Python, PostgreSQL, Redis, MinIO y minio-init.
+
+---
+
 ## 🗺️ Próximos Pasos — Fase 2
 
-- [ ] **Autenticación JWT** — Login, registro y manejo de sesiones con tokens.
-- [ ] **Integración IA** — Visualización de sugerencias de transformación generadas por los modelos de IA del backend.
-- [ ] **Dashboard ampliado** — Más pantallas: historial de transformaciones, reportes, exportación de datos.
 - [ ] **Roles y permisos** — Diferenciación entre administrador, analista y visualizador.
-- [ ] **Notificaciones en tiempo real** — WebSockets para alertas del proceso ETL.
 - [ ] **Modo oscuro** — Soporte para tema claro/oscuro en el sistema de diseño.
 - [ ] **Internacionalización (i18n)** — Soporte inicial en español; extensible a inglés.
+- [ ] **Exportación de datos** — Descarga de reportes en múltiples formatos.
 
 ---
 

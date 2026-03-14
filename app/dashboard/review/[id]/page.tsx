@@ -2,86 +2,113 @@
 
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, Play } from "lucide-react";
-import { AnomalyCard } from "@/components/features/review";
+import { toast } from "sonner";
+import { AnomalyCard, ReviewHeader, AnomalyNavigation } from "@/components/features/review";
 import { useReviewStore } from "@/store";
-import { getAnomalies, getDataset, submitAllDecisions } from "@/services";
+import { useDataset, useAnomalies, useSubmitDecisions } from "@/hooks/api";
 import { REVIEW_ACTION } from "@/types";
-import type { Dataset } from "@/types";
+import type { Anomaly } from "@/types";
+import type { ApiAnomaly } from "@/types/api";
 
 interface PageProps {
   params: Promise<{ id: string }>;
+}
+
+/**
+ * Map a backend ApiAnomaly to the frontend store Anomaly shape.
+ * The backend uses its own type vocabulary; the store uses the frontend review vocabulary.
+ */
+function mapApiAnomalyToStore(a: ApiAnomaly): Anomaly {
+  // Determine AnomalyType from backend type
+  const typeMap: Record<ApiAnomaly["type"], Anomaly["type"]> = {
+    MISSING_VALUE: "FILL_NULLS",
+    DUPLICATE: "REMOVE_DUPLICATES",
+    FORMAT_ERROR: "FIX_DATE_FORMAT",
+    OUTLIER: "REMOVE_OUTLIERS",
+  };
+
+  return {
+    id: a.id,
+    datasetId: a.datasetId,
+    type: typeMap[a.type] ?? "FILL_NULLS",
+    column: a.column,
+    affectedRows: a.row ?? 0,
+    sampleValues: a.originalValue ? [a.originalValue] : [],
+    suggestedFix: a.suggestedValue ?? a.description,
+    confidence: 1,
+    action: a.decision
+      ? (a.decision.action as Anomaly["action"])
+      : REVIEW_ACTION.PENDING,
+    userCorrection: a.decision?.correction ?? undefined,
+  };
 }
 
 export default function ReviewPage({ params }: PageProps) {
   const { id: datasetId } = use(params);
   const router = useRouter();
 
-  const [dataset, setDataset] = useState<Dataset | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Dataset real desde el backend
+  const {
+    data: datasetResponse,
+    isLoading: isDatasetLoading,
+    isError: isDatasetError,
+  } = useDataset(datasetId);
+
+  // Anomalías reales desde el backend
+  const {
+    data: anomaliesResponse,
+    isLoading: isAnomaliesLoading,
+  } = useAnomalies(datasetId);
+
+  const submitDecisionsMutation = useSubmitDecisions(datasetId);
+
+  const dataset = datasetResponse?.data ?? null;
 
   const anomalies = useReviewStore((s) => s.anomalies);
   const setAnomalies = useReviewStore((s) => s.setAnomalies);
   const resetReview = useReviewStore((s) => s.resetReview);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const pendingCount = anomalies.filter(
     (a) => a.action === REVIEW_ACTION.PENDING
   ).length;
 
+  // Sincronizar anomalías del backend con el store de revisión
   useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const [datasetData, anomaliesData] = await Promise.all([
-          getDataset(datasetId),
-          getAnomalies(datasetId),
-        ]);
-
-        if (!datasetData) {
-          setError("Dataset no encontrado");
-          return;
-        }
-
-        setDataset(datasetData);
-        setAnomalies(anomaliesData);
-      } catch (err) {
-        console.error("Error loading review data:", err);
-        setError("Error al cargar los datos de revisión");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
+    if (anomaliesResponse?.data) {
+      const mapped = anomaliesResponse.data.map(mapApiAnomalyToStore);
+      setAnomalies(mapped);
+    }
 
     return () => {
       resetReview();
     };
-  }, [datasetId, setAnomalies, resetReview]);
+  }, [anomaliesResponse, setAnomalies, resetReview]);
 
   const handleSubmitETL = async () => {
     setIsSubmitting(true);
+    useReviewStore.setState({ isSubmitting: true });
     try {
       const decisions = anomalies.map((a) => ({
         anomalyId: a.id,
-        action: a.action,
-        correction: a.userCorrection,
+        action: a.action as "APPROVED" | "CORRECTED" | "DISCARDED",
+        ...(a.userCorrection !== undefined ? { correction: a.userCorrection } : {}),
       }));
-      await submitAllDecisions(decisions);
+
+      await submitDecisionsMutation.mutateAsync({ decisions });
+      toast.success("Decisiones enviadas correctamente. Ejecutando ETL...");
       router.push("/dashboard");
     } catch (err) {
-      console.error("Error submitting decisions:", err);
+      console.error("Error al enviar decisiones:", err);
+      toast.error("Error al enviar las decisiones. Intenta de nuevo.");
     } finally {
       setIsSubmitting(false);
+      useReviewStore.setState({ isSubmitting: false });
     }
   };
 
   // Loading state
-  if (isLoading) {
+  if (isDatasetLoading || isAnomaliesLoading) {
     return (
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center">
@@ -93,12 +120,12 @@ export default function ReviewPage({ params }: PageProps) {
   }
 
   // Error state
-  if (error || !dataset) {
+  if (isDatasetError || !dataset) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="bg-white border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-8 text-center">
           <p className="text-red-600 font-bold mb-4">
-            {error || "Dataset no encontrado"}
+            Dataset no encontrado o error al cargarlo.
           </p>
           <button
             onClick={() => router.push("/dashboard")}
@@ -112,65 +139,58 @@ export default function ReviewPage({ params }: PageProps) {
   }
 
   return (
-    <div className="flex-1 p-8 overflow-auto">
-      {/* Botón volver */}
-      <div className="flex items-center gap-4 mb-6">
-        <button
-          onClick={() => router.push("/dashboard")}
-          className="font-bold border-b-2 border-black hover:text-[#FF6B00] hover:border-[#FF6B00]"
-        >
-          ← Volver al Dashboard
-        </button>
+    <div className="flex flex-col flex-1 overflow-auto">
+      {/* ReviewHeader component — con botón volver y progreso */}
+      <ReviewHeader dataset={dataset} onSubmit={handleSubmitETL} />
+
+      <div className="flex-1 p-8 overflow-auto">
+        {/* Banner azul informativo */}
+        <div className="bg-[#0033A0] text-white border-2 border-black p-6 mb-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex flex-col md:flex-row justify-between items-center gap-4">
+          <div>
+            <h2 className="text-3xl font-black uppercase">
+              Revisión de IA: {dataset.name}
+            </h2>
+            <p className="text-lg font-medium mt-2 opacity-90">
+              El Agente IA ha perfilado los datos y sugiere las siguientes reglas
+              de limpieza.
+            </p>
+          </div>
+          <div className="bg-white text-black font-black text-2xl px-6 py-4 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center">
+            {pendingCount} <br />
+            <span className="text-sm uppercase font-bold">Pendientes</span>
+          </div>
+        </div>
+
+        {/* Grid de anomalías */}
+        {anomalies.length > 0 ? (
+          <>
+            {/* AnomalyNavigation component */}
+            <div className="mb-6">
+              <AnomalyNavigation />
+            </div>
+            <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {anomalies.map((anomaly) => (
+                <AnomalyCard key={anomaly.id} anomaly={anomaly} />
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="bg-white border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-8 text-center">
+            <p className="font-bold text-lg">
+              No se detectaron anomalías en este dataset.
+            </p>
+          </div>
+        )}
+
+        {/* Botón ETL cuando todas resueltas (alternativo al ReviewHeader) */}
+        {pendingCount === 0 && anomalies.length > 0 && (
+          <div className="mt-12 flex justify-center">
+            <p className="text-sm font-medium text-gray-600">
+              Usa el botón &ldquo;Finalizar revisión&rdquo; en la cabecera para enviar las decisiones.
+            </p>
+          </div>
+        )}
       </div>
-
-      {/* Banner azul */}
-      <div className="bg-[#0033A0] text-white border-2 border-black p-6 mb-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex flex-col md:flex-row justify-between items-center gap-4">
-        <div>
-          <h2 className="text-3xl font-black uppercase flex items-center gap-3">
-            <AlertTriangle className="w-8 h-8 text-[#FF6B00]" />
-            Revisión de IA: {dataset.name}
-          </h2>
-          <p className="text-lg font-medium mt-2 opacity-90">
-            El Agente IA ha perfilado los datos y sugiere las siguientes reglas
-            de limpieza.
-          </p>
-        </div>
-        <div className="bg-white text-black font-black text-2xl px-6 py-4 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center">
-          {pendingCount} <br />
-          <span className="text-sm uppercase font-bold">Pendientes</span>
-        </div>
-      </div>
-
-      {/* Grid de anomalías */}
-      {anomalies.length > 0 ? (
-        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {anomalies.map((anomaly) => (
-            <AnomalyCard key={anomaly.id} anomaly={anomaly} />
-          ))}
-        </div>
-      ) : (
-        <div className="bg-white border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-8 text-center">
-          <p className="font-bold text-lg">
-            No se detectaron anomalías en este dataset.
-          </p>
-        </div>
-      )}
-
-      {/* Botón ETL cuando todas resueltas */}
-      {pendingCount === 0 && anomalies.length > 0 && (
-        <div className="mt-12 flex justify-center animate-bounce">
-          <button
-            onClick={handleSubmitETL}
-            disabled={isSubmitting}
-            className="font-bold py-6 px-12 text-xl border-2 border-black bg-[#FF6B00] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all duration-150 flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            {isSubmitting ? "Enviando..." : "Ejecutar Motor ETL"}
-            {!isSubmitting && (
-              <Play className="w-6 h-6 ml-2" fill="currentColor" />
-            )}
-          </button>
-        </div>
-      )}
     </div>
   );
 }

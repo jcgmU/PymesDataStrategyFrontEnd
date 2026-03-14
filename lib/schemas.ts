@@ -1,6 +1,24 @@
 import { z } from "zod";
 import { DATASET_STATUS, REVIEW_ACTION } from "@/types";
 
+// ─────────────────────────────────────────────────────────────
+// Auth schemas
+// ─────────────────────────────────────────────────────────────
+
+export const loginSchema = z.object({
+  email: z.email({ error: 'Correo electrónico no válido' }),
+  password: z.string().min(8, { error: 'La contraseña debe tener al menos 8 caracteres' }),
+})
+
+export const registerSchema = z.object({
+  name: z.string().min(2, { error: 'El nombre debe tener al menos 2 caracteres' }),
+  email: z.email({ error: 'Correo electrónico no válido' }),
+  password: z.string().min(8, { error: 'La contraseña debe tener al menos 8 caracteres' }),
+})
+
+export type LoginFormData = z.infer<typeof loginSchema>
+export type RegisterFormData = z.infer<typeof registerSchema>
+
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_EXTENSIONS = [".csv", ".xlsx", ".xls"];
 
@@ -25,9 +43,9 @@ export const datasetFilterSchema = z.object({
     .enum([
       DATASET_STATUS.PENDING,
       DATASET_STATUS.PROCESSING,
-      DATASET_STATUS.AWAITING_REVIEW,
-      DATASET_STATUS.COMPLETED,
-      DATASET_STATUS.FAILED,
+      DATASET_STATUS.READY,
+      DATASET_STATUS.ERROR,
+      DATASET_STATUS.ARCHIVED,
     ])
     .optional(),
   sortBy: z.enum(["name", "createdAt", "updatedAt", "rowCount"]).optional(),
