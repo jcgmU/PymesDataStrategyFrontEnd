@@ -70,6 +70,9 @@ export interface ApiAnomaly {
   description: string
   originalValue?: string
   suggestedValue?: string
+  aiSuggestion?: string | null
+  aiActionType?: 'FILL' | 'DELETE' | 'KEEP' | null
+  aiActionValue?: string | null
   status: 'PENDING' | 'RESOLVED'
   createdAt: string
   updatedAt: string
@@ -88,6 +91,9 @@ export interface SubmitDecisionsDto {
     anomalyId: string
     action: 'APPROVED' | 'CORRECTED' | 'DISCARDED'
     correction?: string
+    correctionIr?: import('./ir').IRNode
+    irSource?: 'rule' | 'gemini'
+    irRawText?: string
   }>
 }
 

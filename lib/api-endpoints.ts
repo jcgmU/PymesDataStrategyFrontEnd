@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
     delete: (id: string) => `${BASE}/api/v1/datasets/${id}`,
     transform: (id: string) => `${BASE}/api/v1/datasets/${id}/transform`,
     download: (id: string) => `${BASE}/api/v1/datasets/${id}/download`,
+    stream: (id: string, token: string) => `${BASE}/api/v1/datasets/${id}/stream?token=${encodeURIComponent(token)}`,
   },
   jobs: {
     get: (jobId: string) => `${BASE}/api/v1/jobs/${jobId}`,
@@ -22,6 +23,8 @@ export const API_ENDPOINTS = {
   anomalies: {
     list: (datasetId: string) => `${BASE}/api/v1/datasets/${datasetId}/anomalies`,
     submitDecisions: (datasetId: string) => `${BASE}/api/v1/datasets/${datasetId}/decisions`,
+    parseInstruction: (datasetId: string, anomalyId: string) =>
+      `${BASE}/api/v1/datasets/${datasetId}/anomalies/${anomalyId}/parse-instruction`,
   },
   stats: {
     list: () => `${BASE}/api/v1/stats`,

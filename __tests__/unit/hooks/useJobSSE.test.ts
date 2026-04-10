@@ -3,6 +3,11 @@ import { renderHook, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
 
+// ─── Mock next-auth (useJobSSE uses useSession for the auth token) ───────────
+vi.mock('next-auth/react', () => ({
+  useSession: () => ({ data: { accessToken: 'test-token' }, status: 'authenticated' }),
+}))
+
 // ─── Mock EventSource ────────────────────────────────────────────────────────
 type EventSourceHandler = (e: MessageEvent) => void
 type EventMap = Record<string, EventSourceHandler[]>

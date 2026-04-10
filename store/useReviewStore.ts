@@ -2,6 +2,9 @@ import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import type { Anomaly } from "@/types/anomaly";
 import { REVIEW_ACTION } from "@/types/anomaly";
+import type { IRCorrection, PreviewResult, PreviewError } from "@/types/ir";
+import { apiClient } from "@/lib/api-client";
+import { API_ENDPOINTS } from "@/lib/api-endpoints";
 
 interface Progress {
   resolved: number;
@@ -18,11 +21,17 @@ interface ReviewState {
   // Actions
   setAnomalies: (anomalies: Anomaly[]) => void;
   approveAnomaly: (id: string) => void;
-  correctAnomaly: (id: string, correction: string) => void;
+  correctAnomaly: (id: string, correction: string | IRCorrection) => void;
   discardAnomaly: (id: string) => void;
   nextAnomaly: () => void;
   previousAnomaly: () => void;
   resetReview: () => void;
+  previewInstruction: (
+    anomalyId: string,
+    instruction: string,
+    datasetId: string,
+    accessToken?: string
+  ) => Promise<PreviewResult | PreviewError>;
 
   // Computed (getters)
   getCurrentAnomaly: () => Anomaly | null;
@@ -57,7 +66,19 @@ export const useReviewStore = create<ReviewState>()(
         const anomaly = state.anomalies.find((a: Anomaly) => a.id === id);
         if (anomaly) {
           anomaly.action = REVIEW_ACTION.CORRECTED;
-          anomaly.userCorrection = correction;
+          if (typeof correction === "string") {
+            // Legacy path: plain string value
+            anomaly.userCorrection = correction;
+            anomaly.userCorrectionIr = null;
+            anomaly.userCorrectionText = null;
+            anomaly.userCorrectionSource = null;
+          } else {
+            // IR path: structured correction
+            anomaly.userCorrectionIr = correction.ir;
+            anomaly.userCorrectionText = correction.irRawText;
+            anomaly.userCorrectionSource = correction.irSource;
+            anomaly.userCorrection = undefined;
+          }
         }
       }),
 
@@ -89,6 +110,15 @@ export const useReviewStore = create<ReviewState>()(
         state.currentAnomalyIndex = 0;
         state.isSubmitting = false;
       }),
+
+    previewInstruction: async (anomalyId, instruction, datasetId, accessToken) => {
+      const result = await apiClient.post<PreviewResult | PreviewError>(
+        API_ENDPOINTS.anomalies.parseInstruction(datasetId, anomalyId),
+        { instruction },
+        accessToken
+      );
+      return result;
+    },
 
     // Computed (getters)
     getCurrentAnomaly: () => {

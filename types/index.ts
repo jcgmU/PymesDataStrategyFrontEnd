@@ -13,6 +13,18 @@ export {
 } from "./anomaly";
 
 export type {
+  IRNode,
+  AggregateFunction,
+  TransformFn,
+  Condition,
+  ConditionOp,
+  Operand,
+  IRCorrection,
+  PreviewResult,
+  PreviewError,
+} from "./ir";
+
+export type {
   TransformationType,
   JobStatus,
   TransformDatasetDto,

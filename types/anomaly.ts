@@ -31,7 +31,13 @@ export interface Anomaly {
   affectedRows: number;
   sampleValues: string[];
   suggestedFix: string;
+  aiSuggestion?: string | null;
+  aiActionType?: 'FILL' | 'DELETE' | 'KEEP' | null;
+  aiActionValue?: string | null;
   confidence: number;
   action: ReviewAction;
   userCorrection?: string;
+  userCorrectionIr?: import('./ir').IRNode | null;
+  userCorrectionText?: string | null;
+  userCorrectionSource?: 'rule' | 'gemini' | null;
 }

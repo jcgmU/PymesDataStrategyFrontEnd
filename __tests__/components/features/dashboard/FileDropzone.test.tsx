@@ -1,7 +1,16 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import React from 'react'
 import { FileDropzone } from '@/components/features/dashboard/FileDropzone'
 import { useAppStore } from '@/store'
+
+const renderWithQuery = (ui: React.ReactElement) => {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+  )
+}
 
 // Mock the React Query hook
 const mockMutate = vi.fn()
@@ -49,7 +58,7 @@ describe('FileDropzone', () => {
 
   test('should render upload instructions', () => {
     // Arrange & Act
-    render(<FileDropzone />)
+    renderWithQuery(<FileDropzone />)
 
     // Assert
     expect(screen.getByText('Arrastra tu Excel aquí')).toBeInTheDocument()
@@ -59,7 +68,7 @@ describe('FileDropzone', () => {
 
   test('should show dragover state when dragging file over', () => {
     // Arrange
-    render(<FileDropzone />)
+    renderWithQuery(<FileDropzone />)
     // Get the dropzone container (the one with border-dashed class)
     const dropzone = document.querySelector('.border-dashed')!
 
@@ -73,7 +82,7 @@ describe('FileDropzone', () => {
 
   test('should validate file extension on drop and reject .pdf', async () => {
     // Arrange
-    render(<FileDropzone />)
+    renderWithQuery(<FileDropzone />)
     const dropzone = screen.getByText('Arrastra tu Excel aquí').closest('div')!
 
     const invalidFile = new File(['content'], 'document.pdf', { type: 'application/pdf' })
@@ -97,7 +106,7 @@ describe('FileDropzone', () => {
 
   test('should validate file size on drop and reject files > 10MB', async () => {
     // Arrange
-    render(<FileDropzone />)
+    renderWithQuery(<FileDropzone />)
     const dropzone = screen.getByText('Arrastra tu Excel aquí').closest('div')!
 
     // Create a mock file larger than 10MB
@@ -124,7 +133,7 @@ describe('FileDropzone', () => {
 
   test('should call useUploadDataset mutation on valid file drop', async () => {
     // Arrange
-    render(<FileDropzone />)
+    renderWithQuery(<FileDropzone />)
     const dropzone = screen.getByText('Arrastra tu Excel aquí').closest('div')!
 
     const validFile = new File(['col1,col2\nval1,val2'], 'test.csv', { type: 'text/csv' })
@@ -150,7 +159,7 @@ describe('FileDropzone', () => {
       // does not call callbacks
     })
 
-    render(<FileDropzone />)
+    renderWithQuery(<FileDropzone />)
     const dropzone = screen.getByText('Arrastra tu Excel aquí').closest('div')!
 
     const validFile = new File(['col1,col2\nval1,val2'], 'test.csv', { type: 'text/csv' })
@@ -174,7 +183,7 @@ describe('FileDropzone', () => {
     useAppStore.setState({ isUploading: true, uploadProgress: 50 })
 
     // Act
-    render(<FileDropzone />)
+    renderWithQuery(<FileDropzone />)
 
     // Assert
     expect(screen.getByText('Subiendo archivo...')).toBeInTheDocument()
@@ -198,7 +207,7 @@ describe('FileDropzone', () => {
     // Nota: el jobId local del componente controla qué se muestra, pero
     // podemos verificar el estado "idle" por defecto y que Processing
     // se muestra cuando el poller está activo y el componente tiene jobId
-    render(<FileDropzone />)
+    renderWithQuery(<FileDropzone />)
 
     // Con isPolling: true pero jobId local = null, el componente no muestra Processing
     // El estado de Processing depende del estado local jobId.
@@ -220,7 +229,7 @@ describe('FileDropzone', () => {
       isPolling: true,
     })
 
-    render(<FileDropzone />)
+    renderWithQuery(<FileDropzone />)
     const dropzone = document.querySelector('.border-dashed')!
 
     const validFile = new File(['col1,col2'], 'test.csv', { type: 'text/csv' })
@@ -260,7 +269,7 @@ describe('FileDropzone', () => {
       isPolling: false,
     })
 
-    render(<FileDropzone />)
+    renderWithQuery(<FileDropzone />)
     const dropzone = document.querySelector('.border-dashed')!
 
     const validFile = new File(['col1,col2'], 'test.csv', { type: 'text/csv' })
@@ -299,7 +308,7 @@ describe('FileDropzone', () => {
       error: 'Columnas inválidas en el archivo',
     })
 
-    render(<FileDropzone />)
+    renderWithQuery(<FileDropzone />)
     const dropzone = document.querySelector('.border-dashed')!
 
     const validFile = new File(['col1,col2'], 'test.csv', { type: 'text/csv' })
@@ -340,7 +349,7 @@ describe('FileDropzone', () => {
       error: 'Fallo del servidor',
     })
 
-    render(<FileDropzone />)
+    renderWithQuery(<FileDropzone />)
     const dropzone = document.querySelector('.border-dashed')!
 
     const validFile = new File(['col1,col2'], 'test.csv', { type: 'text/csv' })

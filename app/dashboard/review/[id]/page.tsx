@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
 import { AnomalyCard, ReviewHeader, AnomalyNavigation } from "@/components/features/review";
 import { useReviewStore } from "@/store";
@@ -35,6 +35,9 @@ function mapApiAnomalyToStore(a: ApiAnomaly): Anomaly {
     affectedRows: a.row ?? 0,
     sampleValues: a.originalValue ? [a.originalValue] : [],
     suggestedFix: a.suggestedValue ?? a.description,
+    aiSuggestion: a.aiSuggestion ?? null,
+    aiActionType: a.aiActionType ?? null,
+    aiActionValue: a.aiActionValue ?? null,
     confidence: 1,
     action: a.decision
       ? (a.decision.action as Anomaly["action"])
@@ -43,9 +46,16 @@ function mapApiAnomalyToStore(a: ApiAnomaly): Anomaly {
   };
 }
 
-export default function ReviewPage({ params }: PageProps) {
-  const { id: datasetId } = use(params);
+export default function ReviewPage() {
   const router = useRouter();
+  const params = useParams<{ id: string }>();
+  const datasetId = params.id;
+
+  const anomalies = useReviewStore((s) => s.anomalies);
+  const setAnomalies = useReviewStore((s) => s.setAnomalies);
+  const resetReview = useReviewStore((s) => s.resetReview);
+  const currentAnomalyIndex = useReviewStore((s) => s.currentAnomalyIndex);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Dataset real desde el backend
   const {
@@ -54,36 +64,63 @@ export default function ReviewPage({ params }: PageProps) {
     isError: isDatasetError,
   } = useDataset(datasetId);
 
-  // Anomalías reales desde el backend
+  // Anomalías reales desde el backend — polling activo para recibir sugerencias Gemini
   const {
     data: anomaliesResponse,
     isLoading: isAnomaliesLoading,
-  } = useAnomalies(datasetId);
+  } = useAnomalies(datasetId, true);
 
   const submitDecisionsMutation = useSubmitDecisions(datasetId);
 
   const dataset = datasetResponse?.data ?? null;
 
-  const anomalies = useReviewStore((s) => s.anomalies);
-  const setAnomalies = useReviewStore((s) => s.setAnomalies);
-  const resetReview = useReviewStore((s) => s.resetReview);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const pendingCount = anomalies.filter(
     (a) => a.action === REVIEW_ACTION.PENDING
   ).length;
 
-  // Sincronizar anomalías del backend con el store de revisión
+  const [initialized, setInitialized] = useState(false);
+
+  // Primera carga: inicializa el store completo.
+  // Recargas por polling: solo actualiza aiSuggestion para no pisar decisiones del usuario.
   useEffect(() => {
-    if (anomaliesResponse?.data) {
+    if (!anomaliesResponse?.data) return;
+
+    if (!initialized) {
       const mapped = anomaliesResponse.data.map(mapApiAnomalyToStore);
       setAnomalies(mapped);
+      setInitialized(true);
+    } else {
+      // Refrescar campos de IA desde el backend sin pisar decisiones del usuario.
+      // IMPORTANTE: además de `aiSuggestion`, traer `aiActionType` y `aiActionValue`
+      // (cuando Gemini responde después del primer load, estos son los que habilitan
+      // el botón "Aceptar IA" y el seed del input en "Editar").
+      useReviewStore.setState((state) => {
+        const updated = state.anomalies.map((a) => {
+          const fresh = anomaliesResponse.data.find((r) => r.id === a.id);
+          if (!fresh) return a;
+          // No tocar anomalías que el usuario ya resolvió
+          if (a.action !== REVIEW_ACTION.PENDING) return a;
+          return {
+            ...a,
+            aiSuggestion: fresh.aiSuggestion ?? a.aiSuggestion ?? null,
+            aiActionType: fresh.aiActionType ?? a.aiActionType ?? null,
+            aiActionValue: fresh.aiActionValue ?? a.aiActionValue ?? null,
+            // Preserve IR correction fields — never overwrite local user decisions
+            userCorrectionIr: a.userCorrectionIr ?? null,
+            userCorrectionText: a.userCorrectionText ?? null,
+            userCorrectionSource: a.userCorrectionSource ?? null,
+          };
+        });
+        return { anomalies: updated };
+      });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [anomaliesResponse]);
 
-    return () => {
-      resetReview();
-    };
-  }, [anomaliesResponse, setAnomalies, resetReview]);
+  useEffect(() => {
+    return () => { resetReview(); setInitialized(false); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSubmitETL = async () => {
     setIsSubmitting(true);
@@ -93,6 +130,9 @@ export default function ReviewPage({ params }: PageProps) {
         anomalyId: a.id,
         action: a.action as "APPROVED" | "CORRECTED" | "DISCARDED",
         ...(a.userCorrection !== undefined ? { correction: a.userCorrection } : {}),
+        ...(a.userCorrectionIr != null ? { correctionIr: a.userCorrectionIr } : {}),
+        ...(a.userCorrectionSource != null ? { irSource: a.userCorrectionSource } : {}),
+        ...(a.userCorrectionText != null ? { irRawText: a.userCorrectionText } : {}),
       }));
 
       await submitDecisionsMutation.mutateAsync({ decisions });
@@ -168,10 +208,17 @@ export default function ReviewPage({ params }: PageProps) {
             <div className="mb-6">
               <AnomalyNavigation />
             </div>
+            
+            {/* Mostrar solo las anomalías de la página actual */}
             <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {anomalies.map((anomaly) => (
-                <AnomalyCard key={anomaly.id} anomaly={anomaly} />
-              ))}
+              {(() => {
+                const itemsPerPage = 6;
+                const startIndex = Math.floor(currentAnomalyIndex / itemsPerPage) * itemsPerPage;
+                const visibleAnomalies = anomalies.slice(startIndex, startIndex + itemsPerPage);
+                return visibleAnomalies.map((anomaly) => (
+                  <AnomalyCard key={anomaly.id} anomaly={anomaly} />
+                ));
+              })()}
             </div>
           </>
         ) : (
