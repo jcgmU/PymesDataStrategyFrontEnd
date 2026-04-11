@@ -73,10 +73,10 @@ export function ReportModal({ datasetId, datasetName, onClose }: Props) {
   useEffect(() => { fetchReport() }, [datasetId])
 
   return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-      <div className="bg-white border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] w-full max-w-2xl max-h-[90vh] overflow-auto">
-        {/* Header */}
-        <div className="bg-[#0033A0] text-white p-4 flex justify-between items-center border-b-2 border-black">
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-start justify-center p-4 pt-8 overflow-y-auto">
+      <div className="bg-white border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] w-full max-w-2xl flex flex-col my-auto">
+        {/* Header — fijo en la parte superior del modal */}
+        <div className="bg-[#0033A0] text-white p-4 flex justify-between items-center border-b-2 border-black flex-shrink-0 sticky top-0 z-10">
           <h2 className="text-xl font-black uppercase">
             📊 Informe de Calidad — {datasetName}
           </h2>
