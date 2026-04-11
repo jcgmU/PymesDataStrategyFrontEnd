@@ -6,6 +6,48 @@ import type { IRCorrection, PreviewResult, PreviewError } from "@/types/ir";
 import { apiClient } from "@/lib/api-client";
 import { API_ENDPOINTS } from "@/lib/api-endpoints";
 
+// ─────────────────────────────────────────────────────────────
+// localStorage helpers for review progress persistence
+// ─────────────────────────────────────────────────────────────
+
+function getStorageKey(datasetId: string) {
+  return `pymes_review_${datasetId}`;
+}
+
+export function saveProgress(datasetId: string, anomalies: Anomaly[]) {
+  const decided = anomalies.filter((a) => a.action !== REVIEW_ACTION.PENDING);
+  if (decided.length === 0) return;
+  const data = {
+    decisions: decided.map((a) => ({
+      anomalyId: a.id,
+      action: a.action,
+      userCorrection: a.userCorrection,
+      userCorrectionIr: a.userCorrectionIr,
+      userCorrectionText: a.userCorrectionText,
+      userCorrectionSource: a.userCorrectionSource,
+    })),
+    savedAt: new Date().toISOString(),
+  };
+  try {
+    localStorage.setItem(getStorageKey(datasetId), JSON.stringify(data));
+  } catch {}
+}
+
+export function loadProgress(datasetId: string) {
+  try {
+    const raw = localStorage.getItem(getStorageKey(datasetId));
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function clearProgress(datasetId: string) {
+  try {
+    localStorage.removeItem(getStorageKey(datasetId));
+  } catch {}
+}
+
 interface Progress {
   resolved: number;
   total: number;

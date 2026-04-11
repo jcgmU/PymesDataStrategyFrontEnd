@@ -1,9 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Eye, Download, Trash2 } from "lucide-react";
+import { Eye, Download, Trash2, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { Button, Badge } from "@/components/ui";
 import { useAppStore } from "@/store";
@@ -11,6 +12,7 @@ import { useDeleteDataset } from "@/hooks/api";
 import { API_ENDPOINTS } from "@/lib/api-endpoints";
 import { DATASET_STATUS, type DatasetStatus } from "@/types";
 import { cn } from "@/lib/utils";
+import { ReportModal } from "./ReportModal";
 
 const statusConfig: Record<
   DatasetStatus,
@@ -34,6 +36,7 @@ export function DatasetsTable() {
   const { data: session } = useSession();
   const token = session?.accessToken ?? undefined;
   const deleteDatasetMutation = useDeleteDataset();
+  const [reportDatasetId, setReportDatasetId] = useState<string | null>(null);
 
   const { getFilteredDatasets } = useAppStore(
     useShallow((state) => ({
@@ -68,6 +71,7 @@ export function DatasetsTable() {
   }
 
   return (
+    <>
     <div className="overflow-x-auto border-2 border-black rounded-md shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
       <table className="w-full">
         <thead>
@@ -118,14 +122,24 @@ export function DatasetsTable() {
                       </Button>
                     )}
                     {dataset.status === DATASET_STATUS.READY && (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => handleDownload(dataset.id)}
-                      >
-                        <Download className="h-4 w-4 mr-1" />
-                        Descargar
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setReportDatasetId(dataset.id)}
+                        >
+                          <FileText className="h-4 w-4 mr-1" />
+                          Ver Informe
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => handleDownload(dataset.id)}
+                        >
+                          <Download className="h-4 w-4 mr-1" />
+                          Descargar
+                        </Button>
+                      </div>
                     )}
                     <Button
                       variant="outline"
@@ -143,5 +157,13 @@ export function DatasetsTable() {
         </tbody>
       </table>
     </div>
+    {reportDatasetId && (
+      <ReportModal
+        datasetId={reportDatasetId}
+        datasetName={datasets.find(d => d.id === reportDatasetId)?.name ?? reportDatasetId}
+        onClose={() => setReportDatasetId(null)}
+      />
+    )}
+    </>
   );
 }

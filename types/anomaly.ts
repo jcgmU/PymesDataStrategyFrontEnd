@@ -27,6 +27,7 @@ export interface Anomaly {
   id: string;
   datasetId: string;
   type: AnomalyType;
+  apiType?: string;
   column: string;
   affectedRows: number;
   sampleValues: string[];

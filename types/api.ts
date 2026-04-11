@@ -66,7 +66,11 @@ export interface ApiAnomaly {
   datasetId: string
   column: string
   row?: number
-  type: 'MISSING_VALUE' | 'OUTLIER' | 'FORMAT_ERROR' | 'DUPLICATE'
+  type: 'MISSING_VALUE' | 'OUTLIER' | 'FORMAT_ERROR' | 'FORMAT_INVALID' | 'DUPLICATE' |
+        'INCONSISTENT' | 'WHITESPACE_ONLY' | 'SUSPICIOUS_PLACEHOLDER' |
+        'LEADING_TRAILING_WHITESPACE' | 'DATE_LOGICAL' | 'NUMERIC_ROUND_NUMBER' |
+        'LOW_VARIANCE' | 'OUTLIER_IQR' | 'SEQUENCE_GAP' | 'CROSS_FIELD_SWAP'
+  apiType?: string
   description: string
   originalValue?: string
   suggestedValue?: string

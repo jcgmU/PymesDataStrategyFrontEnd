@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
-import { AnomalyCard, ReviewHeader, AnomalyNavigation } from "@/components/features/review";
+import { AnomalyCard, ReviewHeader, AnomalyGroupCard } from "@/components/features/review";
 import { useReviewStore } from "@/store";
+import { saveProgress, loadProgress, clearProgress } from "@/store/useReviewStore";
 import { useDataset, useAnomalies, useSubmitDecisions } from "@/hooks/api";
 import { REVIEW_ACTION } from "@/types";
 import type { Anomaly } from "@/types";
@@ -18,19 +19,48 @@ interface PageProps {
  * Map a backend ApiAnomaly to the frontend store Anomaly shape.
  * The backend uses its own type vocabulary; the store uses the frontend review vocabulary.
  */
+const ANOMALY_TYPE_LABELS: Record<string, string> = {
+  MISSING_VALUE: "Valores Faltantes",
+  DUPLICATE: "Duplicados",
+  FORMAT_INVALID: "Formato Inválido",
+  FORMAT_ERROR: "Error de Formato",
+  OUTLIER: "Valores Atípicos",
+  INCONSISTENT: "Valores Inconsistentes",
+  WHITESPACE_ONLY: "Celdas Vacías (espacios)",
+  SUSPICIOUS_PLACEHOLDER: "Marcadores de Posición",
+  LEADING_TRAILING_WHITESPACE: "Espacios al Inicio/Fin",
+  DATE_LOGICAL: "Fechas Incoherentes",
+  NUMERIC_ROUND_NUMBER: "Números Redondos Sospechosos",
+  LOW_VARIANCE: "Columna Sin Variación",
+  OUTLIER_IQR: "Outliers (IQR)",
+  SEQUENCE_GAP: "Huecos en Secuencia",
+  CROSS_FIELD_SWAP: "Dato en Campo Incorrecto",
+};
+
 function mapApiAnomalyToStore(a: ApiAnomaly): Anomaly {
-  // Determine AnomalyType from backend type
-  const typeMap: Record<ApiAnomaly["type"], Anomaly["type"]> = {
+  const typeMap: Record<string, Anomaly["type"]> = {
     MISSING_VALUE: "FILL_NULLS",
     DUPLICATE: "REMOVE_DUPLICATES",
     FORMAT_ERROR: "FIX_DATE_FORMAT",
+    FORMAT_INVALID: "VALIDATE_EMAIL",
     OUTLIER: "REMOVE_OUTLIERS",
+    INCONSISTENT: "NORMALIZE_CASE",
+    WHITESPACE_ONLY: "TRIM_WHITESPACE",
+    SUSPICIOUS_PLACEHOLDER: "FILL_NULLS",
+    LEADING_TRAILING_WHITESPACE: "TRIM_WHITESPACE",
+    DATE_LOGICAL: "FIX_DATE_FORMAT",
+    NUMERIC_ROUND_NUMBER: "REMOVE_OUTLIERS",
+    LOW_VARIANCE: "REMOVE_OUTLIERS",
+    OUTLIER_IQR: "REMOVE_OUTLIERS",
+    SEQUENCE_GAP: "REMOVE_DUPLICATES",
+    CROSS_FIELD_SWAP: "STANDARDIZE_ADDRESS",
   };
 
   return {
     id: a.id,
     datasetId: a.datasetId,
     type: typeMap[a.type] ?? "FILL_NULLS",
+    apiType: a.type,
     column: a.column,
     affectedRows: a.row ?? 0,
     sampleValues: a.originalValue ? [a.originalValue] : [],
@@ -54,8 +84,13 @@ export default function ReviewPage() {
   const anomalies = useReviewStore((s) => s.anomalies);
   const setAnomalies = useReviewStore((s) => s.setAnomalies);
   const resetReview = useReviewStore((s) => s.resetReview);
-  const currentAnomalyIndex = useReviewStore((s) => s.currentAnomalyIndex);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // localStorage restore banner state
+  const [restoredCount, setRestoredCount] = useState(0);
+  const [showRestoreBanner, setShowRestoreBanner] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [savedProgress, setSavedProgress] = useState<any>(null);
 
   // Dataset real desde el backend
   const {
@@ -117,6 +152,25 @@ export default function ReviewPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [anomaliesResponse]);
 
+  // Check localStorage for saved progress on mount
+  useEffect(() => {
+    const saved = loadProgress(datasetId);
+    if (saved?.decisions?.length > 0) {
+      setSavedProgress(saved);
+      setRestoredCount(saved.decisions.length);
+      setShowRestoreBanner(true);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [datasetId]);
+
+  // Auto-save progress whenever anomalies change (after first load)
+  useEffect(() => {
+    if (initialized && anomalies.length > 0) {
+      saveProgress(datasetId, anomalies);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [anomalies, initialized, datasetId]);
+
   useEffect(() => {
     return () => { resetReview(); setInitialized(false); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -136,6 +190,7 @@ export default function ReviewPage() {
       }));
 
       await submitDecisionsMutation.mutateAsync({ decisions });
+      clearProgress(datasetId);
       toast.success("Decisiones enviadas correctamente. Ejecutando ETL...");
       router.push("/dashboard");
     } catch (err) {
@@ -146,6 +201,20 @@ export default function ReviewPage() {
       useReviewStore.setState({ isSubmitting: false });
     }
   };
+
+  // Build grouped anomalies for rendering
+  const groupedAnomalies = Object.entries(
+    anomalies.reduce<Record<string, Anomaly[]>>((acc, a) => {
+      const key = a.apiType ?? a.type;
+      acc[key] = [...(acc[key] ?? []), a];
+      return acc;
+    }, {})
+  ).map(([type, items]) => ({
+    type,
+    label: ANOMALY_TYPE_LABELS[type] ?? type,
+    totalRows: items.reduce((s, a) => s + a.affectedRows, 0),
+    anomalies: items,
+  }));
 
   // Loading state
   if (isDatasetLoading || isAnomaliesLoading) {
@@ -185,7 +254,7 @@ export default function ReviewPage() {
 
       <div className="flex-1 p-8 overflow-auto">
         {/* Banner azul informativo */}
-        <div className="bg-[#0033A0] text-white border-2 border-black p-6 mb-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="bg-[#0033A0] text-white border-2 border-black p-6 mb-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex flex-col md:flex-row justify-between items-center gap-4">
           <div>
             <h2 className="text-3xl font-black uppercase">
               Revisión de IA: {dataset.name}
@@ -201,26 +270,56 @@ export default function ReviewPage() {
           </div>
         </div>
 
-        {/* Grid de anomalías */}
+        {/* Banner de restauración de progreso */}
+        {showRestoreBanner && savedProgress && (
+          <div className="bg-[#FF6B00] text-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 mb-6 flex items-center justify-between">
+            <p className="font-bold">
+              ↪ Tienes {restoredCount} decisión(es) guardada(s) del{" "}
+              {new Date(savedProgress.savedAt).toLocaleDateString("es-CO")}.
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  useReviewStore.setState((state) => {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    savedProgress.decisions.forEach((d: any) => {
+                      const anomaly = state.anomalies.find((a) => a.id === d.anomalyId);
+                      if (anomaly) {
+                        anomaly.action = d.action;
+                        if (d.userCorrection) anomaly.userCorrection = d.userCorrection;
+                        if (d.userCorrectionIr) anomaly.userCorrectionIr = d.userCorrectionIr;
+                        if (d.userCorrectionText) anomaly.userCorrectionText = d.userCorrectionText;
+                        if (d.userCorrectionSource) anomaly.userCorrectionSource = d.userCorrectionSource;
+                      }
+                    });
+                  });
+                  setShowRestoreBanner(false);
+                  toast.success("Progreso restaurado correctamente.");
+                }}
+                className="bg-white text-black font-bold px-4 py-2 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-gray-100 transition-colors"
+              >
+                Retomar
+              </button>
+              <button
+                onClick={() => {
+                  clearProgress(datasetId);
+                  setShowRestoreBanner(false);
+                }}
+                className="bg-transparent text-white font-bold px-4 py-2 border-2 border-white hover:bg-orange-600 transition-colors"
+              >
+                Descartar
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Grupos de anomalías */}
         {anomalies.length > 0 ? (
-          <>
-            {/* AnomalyNavigation component */}
-            <div className="mb-6">
-              <AnomalyNavigation />
-            </div>
-            
-            {/* Mostrar solo las anomalías de la página actual */}
-            <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {(() => {
-                const itemsPerPage = 6;
-                const startIndex = Math.floor(currentAnomalyIndex / itemsPerPage) * itemsPerPage;
-                const visibleAnomalies = anomalies.slice(startIndex, startIndex + itemsPerPage);
-                return visibleAnomalies.map((anomaly) => (
-                  <AnomalyCard key={anomaly.id} anomaly={anomaly} />
-                ));
-              })()}
-            </div>
-          </>
+          <div className="grid gap-6">
+            {groupedAnomalies.map((group) => (
+              <AnomalyGroupCard key={group.type} group={group} datasetId={datasetId} />
+            ))}
+          </div>
         ) : (
           <div className="bg-white border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-8 text-center">
             <p className="font-bold text-lg">
@@ -229,7 +328,7 @@ export default function ReviewPage() {
           </div>
         )}
 
-        {/* Botón ETL cuando todas resueltas (alternativo al ReviewHeader) */}
+        {/* Mensaje cuando todas resueltas */}
         {pendingCount === 0 && anomalies.length > 0 && (
           <div className="mt-12 flex justify-center">
             <p className="text-sm font-medium text-gray-600">
@@ -241,3 +340,6 @@ export default function ReviewPage() {
     </div>
   );
 }
+
+// Keep AnomalyCard imported to avoid breaking existing tests that may reference the component
+void AnomalyCard;
