@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Check, X, PenTool, CheckCircle2 } from "lucide-react";
+import { Check, X, Sparkles, CheckCircle2, Eye } from "lucide-react";
 import { useReviewStore } from "@/store";
 import { REVIEW_ACTION } from "@/types";
 import type { Anomaly } from "@/types";
+import { AnomalyDetailModal } from "./AnomalyDetailModal";
 
 interface AnomalyGroup {
   type: string;
@@ -44,10 +45,7 @@ function getHeaderClass(type: string): string {
 function AnomalyRow({ anomaly }: { anomaly: Anomaly }) {
   const approveAnomaly = useReviewStore((s) => s.approveAnomaly);
   const discardAnomaly = useReviewStore((s) => s.discardAnomaly);
-  const correctAnomaly = useReviewStore((s) => s.correctAnomaly);
-
-  const [correcting, setCorrecting] = useState(false);
-  const [inputValue, setInputValue] = useState(anomaly.userCorrection ?? "");
+  const [modalOpen, setModalOpen] = useState(false);
 
   const isApproved = anomaly.action === REVIEW_ACTION.APPROVED;
   const isDiscarded = anomaly.action === REVIEW_ACTION.DISCARDED;
@@ -65,118 +63,100 @@ function AnomalyRow({ anomaly }: { anomaly: Anomaly }) {
         a.userCorrectionSource = null;
       }
     });
-    setCorrecting(false);
-  };
-
-  const handleConfirmCorrection = () => {
-    if (inputValue.trim()) {
-      correctAnomaly(anomaly.id, inputValue.trim());
-      setCorrecting(false);
-    }
   };
 
   const sampleValue = anomaly.sampleValues?.[0];
+  const hasAiSuggestion = Boolean(anomaly.aiSuggestion);
 
   return (
-    <div className="border-b border-gray-200 last:border-0 py-3 px-4">
-      <div className="flex flex-wrap items-center gap-3">
-        {/* Column badge */}
-        <span className="bg-black text-white font-bold text-xs px-2 py-1 border border-black shadow-[2px_2px_0px_0px_rgba(255,107,0,1)] shrink-0">
-          {anomaly.column}
-        </span>
+    <>
+      {modalOpen && (
+        <AnomalyDetailModal anomaly={anomaly} onClose={() => setModalOpen(false)} />
+      )}
 
-        {/* Row count + sample */}
-        <span className="text-sm font-medium text-gray-600 shrink-0">
-          {anomaly.affectedRows} fila{anomaly.affectedRows !== 1 ? "s" : ""}
-          {sampleValue ? (
-            <span className="text-gray-400 ml-1">
-              · Ejemplo: <span className="italic">&ldquo;{sampleValue}&rdquo;</span>
-            </span>
-          ) : null}
-        </span>
+      <div
+        className={`border-b border-gray-200 last:border-0 py-3 px-4 ${isPending ? "hover:bg-gray-50 cursor-pointer" : ""} transition-colors`}
+        onClick={() => isPending && setModalOpen(true)}
+      >
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Column badge */}
+          <span className="bg-black text-white font-bold text-xs px-2 py-1 border border-black shadow-[2px_2px_0px_0px_rgba(255,107,0,1)] shrink-0">
+            {anomaly.column}
+          </span>
 
-        {/* Status badge (if decided) */}
-        {isApproved && (
-          <span className="ml-auto flex items-center gap-1 bg-green-100 text-green-800 font-bold text-xs px-2 py-1 border border-green-500">
-            <CheckCircle2 className="w-3 h-3" /> Aprobada
-          </span>
-        )}
-        {isDiscarded && (
-          <span className="ml-auto flex items-center gap-1 bg-red-100 text-red-800 font-bold text-xs px-2 py-1 border border-red-500">
-            <X className="w-3 h-3" /> Descartada
-          </span>
-        )}
-        {isCorrected && (
-          <span className="ml-auto flex items-center gap-1 bg-blue-100 text-blue-800 font-bold text-xs px-2 py-1 border border-blue-500">
-            <PenTool className="w-3 h-3" /> Corregida
-            {anomaly.userCorrection ? (
-              <span className="font-normal">: &ldquo;{anomaly.userCorrection}&rdquo;</span>
+          {/* Row count + sample */}
+          <span className="text-sm font-medium text-gray-600 shrink-0">
+            {anomaly.affectedRows} fila{anomaly.affectedRows !== 1 ? "s" : ""}
+            {sampleValue ? (
+              <span className="text-gray-400 ml-1">
+                · Ejemplo: <span className="italic">&ldquo;{sampleValue}&rdquo;</span>
+              </span>
             ) : null}
           </span>
-        )}
 
-        {/* Action buttons — only when pending */}
-        {isPending && (
-          <div className="ml-auto flex items-center gap-2 flex-wrap">
-            <button
-              onClick={() => approveAnomaly(anomaly.id)}
-              className="font-bold text-xs px-3 py-1 border-2 border-black bg-green-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-1"
-            >
-              <Check className="w-3 h-3" /> Aprobar
-            </button>
-            <button
-              onClick={() => setCorrecting((v) => !v)}
-              className="font-bold text-xs px-3 py-1 border-2 border-black bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-1"
-            >
-              <PenTool className="w-3 h-3" /> Corregir
-            </button>
-            <button
-              onClick={() => discardAnomaly(anomaly.id)}
-              className="font-bold text-xs px-3 py-1 border-2 border-black bg-red-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-1"
-            >
-              <X className="w-3 h-3" /> Descartar
-            </button>
-          </div>
-        )}
+          {/* Badge IA si hay sugerencia disponible */}
+          {hasAiSuggestion && isPending && (
+            <span className="flex items-center gap-1 bg-purple-100 text-purple-700 font-bold text-xs px-2 py-0.5 border border-purple-400 rounded">
+              <Sparkles className="w-3 h-3" /> IA lista
+            </span>
+          )}
 
-        {/* Undo button for decided anomalies */}
-        {!isPending && (
-          <button
-            onClick={handleUndo}
-            className="ml-auto font-bold text-xs px-3 py-1 border-2 border-black bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all"
-          >
-            Deshacer
-          </button>
-        )}
-      </div>
+          {/* Status badge (decided) */}
+          {isApproved && (
+            <span className="ml-auto flex items-center gap-1 bg-green-100 text-green-800 font-bold text-xs px-2 py-1 border border-green-500">
+              <CheckCircle2 className="w-3 h-3" /> Aprobada
+            </span>
+          )}
+          {isDiscarded && (
+            <span className="ml-auto flex items-center gap-1 bg-red-100 text-red-800 font-bold text-xs px-2 py-1 border border-red-500">
+              <X className="w-3 h-3" /> Descartada
+            </span>
+          )}
+          {isCorrected && (
+            <span className="ml-auto flex items-center gap-1 bg-blue-100 text-blue-800 font-bold text-xs px-2 py-1 border border-blue-500">
+              <CheckCircle2 className="w-3 h-3" /> Corregida
+            </span>
+          )}
 
-      {/* Inline correction input */}
-      {correcting && isPending && (
-        <div className="mt-2 flex items-center gap-2">
-          <input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Escribe la corrección..."
-            autoFocus
-            className="flex-1 border-2 border-black px-2 py-1 text-sm font-medium focus:outline-none focus:border-[#0033A0]"
-          />
-          <button
-            onClick={handleConfirmCorrection}
-            disabled={!inputValue.trim()}
-            className="font-bold text-xs px-3 py-1 border-2 border-black bg-green-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Confirmar
-          </button>
-          <button
-            onClick={() => setCorrecting(false)}
-            className="font-bold text-xs px-3 py-1 border-2 border-black bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all"
-          >
-            Cancelar
-          </button>
+          {/* Quick action buttons (pending) */}
+          {isPending && (
+            <div className="ml-auto flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
+              <button
+                onClick={() => approveAnomaly(anomaly.id)}
+                title="Aprobar"
+                className="font-bold text-xs px-3 py-1 border-2 border-black bg-green-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-1"
+              >
+                <Check className="w-3 h-3" /> Aprobar
+              </button>
+              <button
+                onClick={() => setModalOpen(true)}
+                title="Ver detalle y gestionar con IA"
+                className="font-bold text-xs px-3 py-1 border-2 border-black bg-[#0033A0] text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-1"
+              >
+                <Eye className="w-3 h-3" /> Gestionar
+              </button>
+              <button
+                onClick={() => discardAnomaly(anomaly.id)}
+                title="Descartar"
+                className="font-bold text-xs px-3 py-1 border-2 border-black bg-red-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-1"
+              >
+                <X className="w-3 h-3" /> Descartar
+              </button>
+            </div>
+          )}
+
+          {/* Undo for decided */}
+          {!isPending && (
+            <button
+              onClick={(e) => { e.stopPropagation(); handleUndo(); }}
+              className="ml-auto font-bold text-xs px-3 py-1 border-2 border-black bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all"
+            >
+              Deshacer
+            </button>
+          )}
         </div>
-      )}
-    </div>
+      </div>
+    </>
   );
 }
 
