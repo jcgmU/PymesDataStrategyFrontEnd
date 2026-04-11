@@ -1,3 +1,4 @@
+// obsidian://open?vault=proyecto&file=Frontend-MOC
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -10,8 +11,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Compensar",
-  description: "Portal Compensar",
+  title: "PymesDataStrategy",
+  description: "Portal de Estrategia de Datos para PYMES",
 };
 
 export default function RootLayout({

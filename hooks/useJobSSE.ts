@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
+import { useSession } from 'next-auth/react'
 import { useQueryClient } from '@tanstack/react-query'
 import { API_ENDPOINTS } from '@/lib/api-endpoints'
 import type { JobStatus } from '@/types/api'
@@ -25,6 +26,9 @@ export interface UseJobSSEResult {
  * Replaces the polling-based useJobStatus hook.
  */
 export function useJobSSE(jobId: string | null): UseJobSSEResult {
+  const { data: session } = useSession()
+  const token = session?.accessToken
+  
   const [status, setStatus] = useState<JobStatus | undefined>(undefined)
   const [error, setError] = useState<string | undefined>(undefined)
   const [isConnected, setIsConnected] = useState(false)
@@ -34,14 +38,20 @@ export function useJobSSE(jobId: string | null): UseJobSSEResult {
   jobIdRef.current = jobId
 
   useEffect(() => {
-    if (!jobId) {
+    if (!jobId || !token) {
       setStatus(undefined)
       setError(undefined)
       setIsConnected(false)
       return
     }
 
-    const url = API_ENDPOINTS.jobs.events(jobId)
+    // Build the URL with the token as query parameter
+    const baseUrl = API_ENDPOINTS.jobs.events(jobId)
+    // Check if URL already has query parameters
+    const url = baseUrl.includes('?') 
+      ? `${baseUrl}&token=${token}` 
+      : `${baseUrl}?token=${token}`
+      
     const es = new EventSource(url)
     setIsConnected(true)
 
@@ -53,13 +63,15 @@ export function useJobSSE(jobId: string | null): UseJobSSEResult {
         setStatus(normalized)
         if (data.error) setError(data.error)
 
+        // Invalidate dataset list whenever status changes so the table
+        // reflects PROCESSING state immediately (not just on completion)
+        void queryClient.invalidateQueries({ queryKey: ['datasets'] })
+
         if (TERMINAL_STATUSES.includes(normalized)) {
           setIsConnected(false)
           es.close()
 
-          // Invalidate relevant queries so UI refreshes automatically
           if (normalized === 'COMPLETED') {
-            void queryClient.invalidateQueries({ queryKey: ['datasets'] })
             void queryClient.invalidateQueries({ queryKey: ['stats'] })
           }
         }
@@ -83,7 +95,7 @@ export function useJobSSE(jobId: string | null): UseJobSSEResult {
       es.close()
       setIsConnected(false)
     }
-  }, [jobId, queryClient])
+  }, [jobId, token, queryClient])
 
   return { status, error, isConnected }
 }

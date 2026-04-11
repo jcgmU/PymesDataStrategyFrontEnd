@@ -41,14 +41,16 @@ function MetricsSkeleton() {
   )
 }
 
-function formatTime(ms: number): string {
-  if (ms === 0) return '—'
+function formatTime(ms: number | undefined | null): string {
+  if (ms == null || isNaN(ms) || ms === 0) return '—'
   if (ms < 1000) return `${ms}ms`
   return `${(ms / 1000).toFixed(1)}s`
 }
 
 export function MetricsBand() {
   const { data, isLoading, isError } = useStats()
+
+  console.log('MetricsBand data received from hook:', data)
 
   if (isLoading) return <MetricsSkeleton />
 
@@ -75,7 +77,7 @@ export function MetricsBand() {
       {/* Tarjetas */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <MetricCard label="Total Datasets" value={data.totalDatasets} accent />
-        <MetricCard label="Este Mes" value={data.datasetsThisMonth} />
+        <MetricCard label="Total Jobs" value={data.totalJobs} />
         <MetricCard label="Jobs Completados" value={data.jobsCompleted} />
         <MetricCard label="Jobs Fallidos" value={data.jobsFailed} />
         <MetricCard label="Tiempo Promedio" value={formatTime(data.avgProcessingTimeMs)} />

@@ -19,6 +19,7 @@ import { useStats } from '@/hooks/useStats'
 const mockStatsData = {
   totalDatasets: 10,
   datasetsThisMonth: 3,
+  totalJobs: 9,
   jobsCompleted: 7,
   jobsFailed: 2,
   avgProcessingTimeMs: 1500,
@@ -40,7 +41,7 @@ describe('useStats', () => {
   })
 
   it('retorna datos de stats correctamente', async () => {
-    mockGet.mockResolvedValue(mockStatsData)
+    mockGet.mockResolvedValue({ success: true, data: mockStatsData })
 
     const { result } = renderHook(() => useStats(), { wrapper: createWrapper() })
 
@@ -67,7 +68,7 @@ describe('useStats', () => {
   })
 
   it('llama al endpoint correcto', async () => {
-    mockGet.mockResolvedValue(mockStatsData)
+    mockGet.mockResolvedValue({ success: true, data: mockStatsData })
 
     renderHook(() => useStats(), { wrapper: createWrapper() })
 

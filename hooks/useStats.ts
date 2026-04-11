@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth'
 export interface StatsResponse {
   totalDatasets: number
   datasetsThisMonth: number
+  totalJobs: number
   jobsCompleted: number
   jobsFailed: number
   avgProcessingTimeMs: number
@@ -15,10 +16,16 @@ export interface StatsResponse {
 export function useStats() {
   const { accessToken } = useAuth()
 
-  return useQuery<StatsResponse>({
+  return useQuery({
     queryKey: ['stats'],
-    queryFn: () =>
-      apiClient.get<StatsResponse>(API_ENDPOINTS.stats.list(), accessToken ?? undefined),
-    staleTime: 30_000, // 30 segundos
+    queryFn: async () => {
+      const response = await apiClient.get<{ success: boolean; data: StatsResponse }>(
+        API_ENDPOINTS.stats.list(),
+        accessToken ?? undefined
+      )
+      return response.data
+    },
+    staleTime: 0,
+    enabled: !!accessToken,
   })
 }

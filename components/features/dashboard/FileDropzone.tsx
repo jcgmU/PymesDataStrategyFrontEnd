@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, type DragEvent, type ChangeEvent } from "r
 import { useShallow } from "zustand/react/shallow";
 import { UploadCloud, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import { ProgressBar } from "@/components/ui";
 import { useAppStore } from "@/store";
 import { useUploadDataset } from "@/hooks/api";
@@ -23,6 +24,7 @@ export function FileDropzone() {
   const [error, setError] = useState<string | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
 
   const { isUploading, uploadProgress, setUploading } = useAppStore(
     useShallow((state) => ({
@@ -35,15 +37,21 @@ export function FileDropzone() {
   const uploadMutation = useUploadDataset();
   const { jobStatus, isCompleted, isFailed, error: jobError } = useJobPoller(jobId);
 
-  // Cuando el job se completa, mostrar éxito 2s y luego resetear
+  // Cuando el job se completa o falla, invalida para refrescar la tabla y las métricas
   useEffect(() => {
-    if (!isCompleted) return;
-    toast.success("¡ETL completado! El dataset está listo.");
-    const timer = setTimeout(() => {
-      setJobId(null);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, [isCompleted]);
+    if (isCompleted || isFailed) {
+      queryClient.invalidateQueries({ queryKey: ["datasets"] });
+      queryClient.invalidateQueries({ queryKey: ["stats"] });
+    }
+    
+    if (isCompleted) {
+      toast.success("¡ETL completado! El dataset está listo.");
+      const timer = setTimeout(() => {
+        setJobId(null);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isCompleted, isFailed, queryClient]);
 
   const validateFile = (file: File): string | null => {
     const extension = `.${file.name.split(".").pop()?.toLowerCase()}`;

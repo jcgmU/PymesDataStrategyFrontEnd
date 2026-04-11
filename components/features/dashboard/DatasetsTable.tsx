@@ -2,10 +2,13 @@
 
 import { useShallow } from "zustand/react/shallow";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { Eye, Download, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button, Badge } from "@/components/ui";
 import { useAppStore } from "@/store";
 import { useDeleteDataset } from "@/hooks/api";
+import { API_ENDPOINTS } from "@/lib/api-endpoints";
 import { DATASET_STATUS, type DatasetStatus } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +31,8 @@ function formatFileSize(bytes: number): string {
 
 export function DatasetsTable() {
   const router = useRouter();
+  const { data: session } = useSession();
+  const token = session?.accessToken ?? undefined;
   const deleteDatasetMutation = useDeleteDataset();
 
   const { getFilteredDatasets } = useAppStore(
@@ -42,14 +47,12 @@ export function DatasetsTable() {
     router.push(`/dashboard/review/${id}`);
   };
 
-  const handleDownload = async (id: string) => {
-    const res = await fetch(`/api/v1/datasets/${id}/download`, {
-      headers: { "x-user-id": "user-001" },
-    });
-    if (res.ok) {
-      const { data } = await res.json();
-      window.open(data.url, "_blank");
+  const handleDownload = (id: string) => {
+    if (!token) {
+      toast.error("No se pudo obtener el enlace de descarga.");
+      return;
     }
+    window.open(API_ENDPOINTS.datasets.stream(id, token), "_blank");
   };
 
   const handleDelete = (id: string) => {

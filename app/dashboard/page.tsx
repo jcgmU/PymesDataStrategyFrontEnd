@@ -1,20 +1,39 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { FileSpreadsheet } from "lucide-react";
+import { toast } from "sonner";
 import { FileDropzone, DatasetsTable, FilterBar, MetricsBand } from "@/components/features/dashboard";
 import { useDatasets } from "@/hooks/api";
 import { useAppStore } from "@/store";
+import { useGlobalSSE } from "@/hooks/useGlobalSSE";
 
 export default function DashboardPage() {
+  // Activate real-time dataset updates via SSE while the dashboard is mounted
+  useGlobalSSE();
+
   const { data, isLoading, isError } = useDatasets();
   const setDatasets = useAppStore((state) => state.setDatasets);
+  const prevStatusesRef = useRef<Record<string, string>>({});
 
   // Sincronizar datasets del backend con el store (para filtros y DatasetsTable)
   useEffect(() => {
-    if (data?.data) {
-      setDatasets(data.data);
+    if (!data?.data) return;
+    setDatasets(data.data);
+
+    // Detectar cambios de estado y notificar al usuario
+    const prevStatuses = prevStatusesRef.current;
+    for (const dataset of data.data) {
+      const prev = prevStatuses[dataset.id];
+      if (prev && prev !== dataset.status) {
+        if (dataset.status === "READY") {
+          toast.success(`"${dataset.name}" listo para revisión`, { duration: 5000 });
+        } else if (dataset.status === "ERROR") {
+          toast.error(`Error al procesar "${dataset.name}"`, { duration: 8000 });
+        }
+      }
     }
+    prevStatusesRef.current = Object.fromEntries(data.data.map((d) => [d.id, d.status]));
   }, [data?.data, setDatasets]);
 
   return (

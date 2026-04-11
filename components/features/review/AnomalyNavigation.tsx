@@ -18,8 +18,29 @@ export function AnomalyNavigation() {
     );
 
   const total = anomalies.length;
-  const canGoBack = currentAnomalyIndex > 0;
-  const canGoForward = currentAnomalyIndex < total - 1;
+  const itemsPerPage = 6;
+  const totalPages = Math.ceil(total / itemsPerPage);
+  const currentPage = Math.floor(currentAnomalyIndex / itemsPerPage) + 1;
+
+  const canGoBack = currentPage > 1;
+  const canGoForward = currentPage < totalPages;
+
+  // Custom navigation
+  const goBack = () => {
+    if (canGoBack) {
+      useReviewStore.setState({ 
+        currentAnomalyIndex: (currentPage - 2) * itemsPerPage 
+      });
+    }
+  };
+
+  const goForward = () => {
+    if (canGoForward) {
+      useReviewStore.setState({ 
+        currentAnomalyIndex: currentPage * itemsPerPage 
+      });
+    }
+  };
 
   // Keyboard navigation
   useEffect(() => {
@@ -33,15 +54,15 @@ export function AnomalyNavigation() {
       }
 
       if (e.key === "ArrowLeft" && canGoBack) {
-        previousAnomaly();
+        goBack();
       } else if (e.key === "ArrowRight" && canGoForward) {
-        nextAnomaly();
+        goForward();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [canGoBack, canGoForward, nextAnomaly, previousAnomaly]);
+  }, [canGoBack, canGoForward]);
 
   if (total === 0) return null;
 
@@ -50,24 +71,24 @@ export function AnomalyNavigation() {
       <Button
         variant="outline"
         size="sm"
-        onClick={previousAnomaly}
+        onClick={goBack}
         disabled={!canGoBack}
-        aria-label="Anomalía anterior"
+        aria-label="Página anterior"
       >
         <ChevronLeft className="h-4 w-4 mr-1" />
         Anterior
       </Button>
 
       <span className="text-sm font-medium text-text tabular-nums">
-        {currentAnomalyIndex + 1} / {total}
+        {currentPage} / {totalPages}
       </span>
 
       <Button
         variant="outline"
         size="sm"
-        onClick={nextAnomaly}
+        onClick={goForward}
         disabled={!canGoForward}
-        aria-label="Siguiente anomalía"
+        aria-label="Siguiente página"
       >
         Siguiente
         <ChevronRight className="h-4 w-4 ml-1" />

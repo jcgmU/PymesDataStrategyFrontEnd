@@ -24,6 +24,7 @@ import React from 'react'
 const mockStats = {
   totalDatasets: 12,
   datasetsThisMonth: 4,
+  totalJobs: 10,
   jobsCompleted: 9,
   jobsFailed: 1,
   avgProcessingTimeMs: 2300,
@@ -54,7 +55,7 @@ describe('MetricsBand', () => {
 
     expect(screen.getByText('Métricas del Sistema')).toBeInTheDocument()
     expect(screen.getByText('12')).toBeInTheDocument() // totalDatasets
-    expect(screen.getByText('4')).toBeInTheDocument()  // datasetsThisMonth
+    expect(screen.getByText('10')).toBeInTheDocument() // totalJobs
     expect(screen.getByText('9')).toBeInTheDocument()  // jobsCompleted
     expect(screen.getByText('1')).toBeInTheDocument()  // jobsFailed
     expect(screen.getByText('2')).toBeInTheDocument()  // pendingReviews
