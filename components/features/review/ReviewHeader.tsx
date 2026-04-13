@@ -31,7 +31,7 @@ export function ReviewHeader({ dataset, onSubmit }: ReviewHeaderProps) {
   };
 
   return (
-    <header className="bg-surface border-b-2 border-black p-4">
+    <header className="bg-white border-b border-[#e2e8f0] p-4 shadow-[0_1px_3px_rgba(0,0,0,.06)]">
       <div className="flex items-center justify-between gap-4">
         {/* Left side: Back button and dataset name */}
         <div className="flex items-center gap-4">

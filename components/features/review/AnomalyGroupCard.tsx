@@ -20,28 +20,27 @@ interface Props {
 }
 
 const TYPE_HEADER_COLORS: Record<string, string> = {
-  MISSING_VALUE: "bg-yellow-400",
-  WHITESPACE_ONLY: "bg-yellow-300",
-  SUSPICIOUS_PLACEHOLDER: "bg-yellow-300",
-  LEADING_TRAILING_WHITESPACE: "bg-yellow-200",
-  DUPLICATE: "bg-red-400",
-  SEQUENCE_GAP: "bg-red-300",
-  OUTLIER: "bg-[#FF6B00]",
-  NUMERIC_ROUND_NUMBER: "bg-orange-400",
-  LOW_VARIANCE: "bg-orange-300",
-  OUTLIER_IQR: "bg-orange-400",
-  FORMAT_ERROR: "bg-[#0033A0] text-white",
-  FORMAT_INVALID: "bg-blue-600 text-white",
-  DATE_LOGICAL: "bg-blue-400",
-  INCONSISTENT: "bg-purple-400",
-  CROSS_FIELD_SWAP: "bg-purple-500 text-white",
+  MISSING_VALUE:              "bg-[#fef3c7] text-[#92400e]",
+  WHITESPACE_ONLY:            "bg-[#fef9c3] text-[#854d0e]",
+  SUSPICIOUS_PLACEHOLDER:     "bg-[#fef9c3] text-[#854d0e]",
+  LEADING_TRAILING_WHITESPACE:"bg-[#fefce8] text-[#713f12]",
+  DUPLICATE:                  "bg-[#fee2e2] text-[#991b1b]",
+  SEQUENCE_GAP:               "bg-[#fecaca] text-[#991b1b]",
+  OUTLIER:                    "bg-[#fff0e6] text-[#c2410c]",
+  NUMERIC_ROUND_NUMBER:       "bg-[#ffedd5] text-[#c2410c]",
+  LOW_VARIANCE:               "bg-[#fff7ed] text-[#9a3412]",
+  OUTLIER_IQR:                "bg-[#ffedd5] text-[#c2410c]",
+  FORMAT_ERROR:               "bg-[#dbeafe] text-[#1e40af]",
+  FORMAT_INVALID:             "bg-[#eff6ff] text-[#1d4ed8]",
+  DATE_LOGICAL:               "bg-[#e0f2fe] text-[#0369a1]",
+  INCONSISTENT:               "bg-[#f3e8ff] text-[#7e22ce]",
+  CROSS_FIELD_SWAP:           "bg-[#ede9fe] text-[#6d28d9]",
 };
 
 function getHeaderClass(type: string): string {
-  return TYPE_HEADER_COLORS[type] ?? "bg-gray-300";
+  return TYPE_HEADER_COLORS[type] ?? "bg-[#f1f5f9] text-[#475569]";
 }
 
-/** Row for a single anomaly (one column) inside the group card */
 function AnomalyRow({ anomaly }: { anomaly: Anomaly }) {
   const approveAnomaly = useReviewStore((s) => s.approveAnomaly);
   const discardAnomaly = useReviewStore((s) => s.discardAnomaly);
@@ -75,81 +74,81 @@ function AnomalyRow({ anomaly }: { anomaly: Anomaly }) {
       )}
 
       <div
-        className={`border-b border-gray-200 last:border-0 py-3 px-4 ${isPending ? "hover:bg-gray-50 cursor-pointer" : ""} transition-colors`}
+        className={`border-b border-[#e2e8f0] last:border-0 py-3 px-4 ${isPending ? "hover:bg-[#f8fafc] cursor-pointer" : ""} transition-colors`}
         onClick={() => isPending && setModalOpen(true)}
       >
         <div className="flex flex-wrap items-center gap-3">
           {/* Column badge */}
-          <span className="bg-black text-white font-bold text-xs px-2 py-1 border border-black shadow-[2px_2px_0px_0px_rgba(255,107,0,1)] shrink-0">
+          <span className="bg-[#1e293b] text-white font-semibold text-xs px-2 py-1 rounded-md shrink-0">
             {anomaly.column}
           </span>
 
           {/* Row count + sample */}
-          <span className="text-sm font-medium text-gray-600 shrink-0">
+          <span className="text-sm font-medium text-[#64748b] shrink-0">
             {anomaly.affectedRows} fila{anomaly.affectedRows !== 1 ? "s" : ""}
             {sampleValue ? (
-              <span className="text-gray-400 ml-1">
+              <span className="text-[#94a3b8] ml-1">
                 · Ejemplo: <span className="italic">&ldquo;{sampleValue}&rdquo;</span>
               </span>
             ) : null}
           </span>
 
-          {/* Badge IA si hay sugerencia disponible */}
+          {/* Badge IA */}
           {hasAiSuggestion && isPending && (
-            <span className="flex items-center gap-1 bg-purple-100 text-purple-700 font-bold text-xs px-2 py-0.5 border border-purple-400 rounded">
+            <span className="flex items-center gap-1 bg-purple-100 text-purple-700 font-semibold text-xs px-2 py-0.5 border border-purple-300 rounded-full">
               <Sparkles className="w-3 h-3" /> IA lista
             </span>
           )}
 
-          {/* Status badge (decided) */}
+          {/* Status badges */}
           {isApproved && (
-            <span className="ml-auto flex items-center gap-1 bg-green-100 text-green-800 font-bold text-xs px-2 py-1 border border-green-500">
+            <span className="ml-auto flex items-center gap-1 bg-[#d1fae5] text-[#059669] font-semibold text-xs px-2 py-1 rounded-md">
               <CheckCircle2 className="w-3 h-3" /> Aprobada
             </span>
           )}
           {isDiscarded && (
-            <span className="ml-auto flex items-center gap-1 bg-red-100 text-red-800 font-bold text-xs px-2 py-1 border border-red-500">
+            <span className="ml-auto flex items-center gap-1 bg-[#fee2e2] text-[#dc2626] font-semibold text-xs px-2 py-1 rounded-md">
               <X className="w-3 h-3" /> Descartada
             </span>
           )}
           {isCorrected && (
-            <span className="ml-auto flex items-center gap-1 bg-blue-100 text-blue-800 font-bold text-xs px-2 py-1 border border-blue-500">
+            <span className="ml-auto flex items-center gap-1 bg-[#dbeafe] text-[#1d4ed8] font-semibold text-xs px-2 py-1 rounded-md">
               <CheckCircle2 className="w-3 h-3" /> Corregida
             </span>
           )}
 
-          {/* Quick action buttons (pending) */}
+          {/* Quick action buttons */}
           {isPending && (
             <div className="ml-auto flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
               <button
                 onClick={() => approveAnomaly(anomaly.id)}
                 title="Aprobar"
-                className="font-bold text-xs px-3 py-1 border-2 border-black bg-green-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-1"
+                className="font-semibold text-xs px-3 py-1 rounded-lg bg-[#059669] text-white hover:bg-[#047857] transition-colors flex items-center gap-1"
               >
                 <Check className="w-3 h-3" /> Aprobar
               </button>
               <button
                 onClick={() => setModalOpen(true)}
                 title="Ver detalle y gestionar con IA"
-                className="font-bold text-xs px-3 py-1 border-2 border-black bg-[#0033A0] text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-1"
+                className="font-semibold text-xs px-3 py-1 rounded-lg bg-[#ff6600] text-white hover:bg-[#cc5200] transition-colors flex items-center gap-1"
               >
                 <Eye className="w-3 h-3" /> Gestionar
               </button>
               <button
                 onClick={() => discardAnomaly(anomaly.id)}
                 title="Descartar"
-                className="font-bold text-xs px-3 py-1 border-2 border-black bg-red-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-1"
+                className="font-semibold text-xs px-3 py-1 rounded-lg bg-[#dc2626] text-white hover:bg-[#b91c1c] transition-colors flex items-center gap-1"
               >
                 <X className="w-3 h-3" /> Descartar
               </button>
             </div>
           )}
 
-          {/* Undo for decided */}
+          {/* Undo */}
           {!isPending && (
             <button
               onClick={(e) => { e.stopPropagation(); handleUndo(); }}
-              className="ml-auto font-bold text-xs px-3 py-1 border-2 border-black bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all"
+              className="ml-auto font-semibold text-xs px-3 py-1 rounded-lg border border-[#e2e8f0] bg-white text-[#1e293b] hover:bg-[#f8fafc] transition-colors"
             >
               Deshacer
             </button>
@@ -164,14 +163,14 @@ export function AnomalyGroupCard({ group }: Props) {
   const headerClass = getHeaderClass(group.type);
 
   return (
-    <div className="bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+    <div className="bg-white rounded-[10px] shadow-[0_1px_3px_rgba(0,0,0,.08)] overflow-hidden border border-[#e2e8f0]">
       {/* Group header */}
-      <div className={`${headerClass} border-b-2 border-black px-4 py-3 flex items-center justify-between`}>
+      <div className={`${headerClass} border-b border-[#e2e8f0] px-4 py-3 flex items-center justify-between`}>
         <div>
-          <span className="font-black text-sm uppercase tracking-wide">
+          <span className="font-semibold text-sm tracking-wide">
             {group.label}
           </span>
-          <span className="ml-3 font-medium text-sm opacity-80">
+          <span className="ml-3 font-medium text-sm opacity-70">
             {group.anomalies.length} columna{group.anomalies.length !== 1 ? "s" : ""} afectada{group.anomalies.length !== 1 ? "s" : ""}
             {" · "}
             {group.totalRows} fila{group.totalRows !== 1 ? "s" : ""} en total

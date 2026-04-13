@@ -221,7 +221,7 @@ export default function ReviewPage() {
     return (
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin h-8 w-8 border-4 border-[#0033A0] border-t-transparent rounded-full mx-auto mb-4" />
+          <div className="animate-spin h-8 w-8 border-4 border-[#ff6600] border-t-transparent rounded-full mx-auto mb-4" />
           <p className="text-gray-500 font-bold">Cargando revisión...</p>
         </div>
       </div>
@@ -232,13 +232,13 @@ export default function ReviewPage() {
   if (isDatasetError || !dataset) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="bg-white border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-8 text-center">
-          <p className="text-red-600 font-bold mb-4">
+        <div className="bg-white rounded-[10px] shadow-[0_1px_3px_rgba(0,0,0,.08)] p-8 text-center border border-[#e2e8f0]">
+          <p className="text-[#dc2626] font-semibold mb-4">
             Dataset no encontrado o error al cargarlo.
           </p>
           <button
             onClick={() => router.push("/dashboard")}
-            className="font-bold py-2 px-6 border-2 border-black bg-white text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all duration-150"
+            className="font-semibold py-2 px-6 rounded-lg bg-[#1e293b] text-white hover:bg-[#0f172a] active:scale-[0.98] transition-all duration-150"
           >
             Volver al Dashboard
           </button>
@@ -254,26 +254,26 @@ export default function ReviewPage() {
 
       <div className="flex-1 p-8 overflow-auto">
         {/* Banner azul informativo */}
-        <div className="bg-[#0033A0] text-white border-2 border-black p-6 mb-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="bg-[#1e293b] text-white rounded-[10px] p-6 mb-6 shadow-[0_4px_6px_rgba(0,0,0,.07)] flex flex-col md:flex-row justify-between items-center gap-4">
           <div>
-            <h2 className="text-3xl font-black uppercase">
+            <h2 className="text-xl font-bold">
               Revisión de IA: {dataset.name}
             </h2>
-            <p className="text-lg font-medium mt-2 opacity-90">
+            <p className="text-sm font-medium mt-1 text-white/75">
               El Agente IA ha perfilado los datos y sugiere las siguientes reglas
               de limpieza.
             </p>
           </div>
-          <div className="bg-white text-black font-black text-2xl px-6 py-4 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center">
-            {pendingCount} <br />
-            <span className="text-sm uppercase font-bold">Pendientes</span>
+          <div className="bg-white text-[#1e293b] font-bold text-2xl px-6 py-3 rounded-[10px] text-center min-w-[80px]">
+            {pendingCount}
+            <div className="text-xs font-semibold text-[#64748b] mt-0.5">Pendientes</div>
           </div>
         </div>
 
         {/* Banner de restauración de progreso */}
         {showRestoreBanner && savedProgress && (
-          <div className="bg-[#FF6B00] text-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 mb-6 flex items-center justify-between">
-            <p className="font-bold">
+          <div className="bg-[#fff0e6] border border-[#ff6600]/30 rounded-[10px] p-4 mb-6 flex items-center justify-between">
+            <p className="font-semibold text-[#c2410c] text-sm">
               ↪ Tienes {restoredCount} decisión(es) guardada(s) del{" "}
               {new Date(savedProgress.savedAt).toLocaleDateString("es-CO")}.
             </p>
@@ -296,7 +296,7 @@ export default function ReviewPage() {
                   setShowRestoreBanner(false);
                   toast.success("Progreso restaurado correctamente.");
                 }}
-                className="bg-white text-black font-bold px-4 py-2 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-gray-100 transition-colors"
+                className="font-semibold text-sm px-4 py-2 rounded-lg bg-[#ff6600] text-white hover:bg-[#cc5200] active:scale-[0.98] transition-all"
               >
                 Retomar
               </button>
@@ -305,7 +305,7 @@ export default function ReviewPage() {
                   clearProgress(datasetId);
                   setShowRestoreBanner(false);
                 }}
-                className="bg-transparent text-white font-bold px-4 py-2 border-2 border-white hover:bg-orange-600 transition-colors"
+                className="font-semibold text-sm px-4 py-2 rounded-lg border border-[#e2e8f0] bg-white text-[#64748b] hover:bg-[#f8fafc] transition-colors"
               >
                 Descartar
               </button>
@@ -321,8 +321,8 @@ export default function ReviewPage() {
             ))}
           </div>
         ) : (
-          <div className="bg-white border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-8 text-center">
-            <p className="font-bold text-lg">
+          <div className="bg-white rounded-[10px] shadow-[0_1px_3px_rgba(0,0,0,.08)] border border-[#e2e8f0] p-8 text-center">
+            <p className="font-semibold text-lg text-[#1e293b]">
               No se detectaron anomalías en este dataset.
             </p>
           </div>

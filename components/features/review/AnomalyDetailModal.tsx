@@ -8,8 +8,6 @@ import type { Anomaly, AnomalyType } from "@/types";
 import type { IRCorrection, PreviewResult, PreviewError } from "@/types/ir";
 import { useSession } from "next-auth/react";
 
-// ── Helpers reutilizados del AnomalyCard original ──────────────────────────
-
 function isPlausibleAiValue(v: string | null | undefined): v is string {
   if (v === null || v === undefined) return false;
   if (typeof v !== "string") return false;
@@ -140,44 +138,44 @@ export function AnomalyDetailModal({ anomaly, onClose }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div
-        className="bg-white border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] w-full max-w-lg max-h-[90vh] overflow-auto"
+        className="bg-white rounded-[10px] shadow-[0_20px_40px_rgba(0,0,0,.2)] w-full max-w-lg max-h-[90vh] overflow-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="bg-[#0033A0] text-white px-4 py-3 flex items-center justify-between border-b-2 border-black">
+        <div className="bg-[#1e293b] text-white px-5 py-4 flex items-center justify-between rounded-t-[10px]">
           <div>
-            <span className="text-xs font-bold uppercase opacity-75">Anomalía</span>
-            <p className="font-black text-lg">Columna: {anomaly.column}</p>
+            <span className="text-xs font-semibold uppercase opacity-60">Anomalía</span>
+            <p className="font-bold text-lg">Columna: {anomaly.column}</p>
           </div>
-          <button onClick={onClose} className="text-white font-black text-xl hover:opacity-70 transition-opacity">✕</button>
+          <button onClick={onClose} className="text-white/70 hover:text-white text-xl transition-colors font-bold">✕</button>
         </div>
 
         <div className="p-5 space-y-4">
           {/* Descripción */}
           <div>
-            <p className="text-xs font-bold uppercase text-gray-500 mb-1">Anomalía Detectada</p>
-            <p className="font-bold text-base">{description}</p>
+            <p className="text-xs font-semibold uppercase text-[#64748b] mb-1">Anomalía Detectada</p>
+            <p className="font-semibold text-base text-[#1e293b]">{description}</p>
             {anomaly.sampleValues?.[0] && (
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-[#64748b] mt-1">
                 Ejemplo: <span className="italic font-medium">&ldquo;{anomaly.sampleValues[0]}&rdquo;</span>
               </p>
             )}
           </div>
 
-          {/* Sugerencia básica si no hay Gemini */}
+          {/* Sugerencia básica */}
           {!anomaly.aiSuggestion && (
-            <div className="bg-blue-50 p-3 border-l-4 border-[#0033A0]">
-              <p className="text-xs font-bold uppercase text-[#0033A0] mb-1">Sugerencia</p>
-              <p className="font-medium text-sm">{anomaly.suggestedFix}</p>
+            <div className="bg-[#dbeafe] p-3 rounded-lg border-l-4 border-[#1d4ed8]">
+              <p className="text-xs font-semibold uppercase text-[#1d4ed8] mb-1">Sugerencia</p>
+              <p className="font-medium text-sm text-[#1e293b]">{anomaly.suggestedFix}</p>
             </div>
           )}
 
           {/* Panel Gemini AI */}
           {anomaly.aiSuggestion && isPending && !aiDismissed && (
-            <div className="bg-purple-50 p-3 border-l-4 border-purple-500">
-              <p className="text-xs font-bold uppercase text-purple-700 mb-1 flex items-center gap-1">
+            <div className="bg-purple-50 p-3 rounded-lg border-l-4 border-purple-500">
+              <p className="text-xs font-semibold uppercase text-purple-700 mb-1 flex items-center gap-1">
                 <Sparkles className="w-3 h-3" /> Gemini AI
               </p>
               {editingAi ? (
@@ -187,18 +185,18 @@ export function AnomalyDetailModal({ anomaly, onClose }: Props) {
                     value={editValue}
                     onChange={(e) => setEditValue(e.target.value)}
                     autoFocus
-                    className="w-full border-2 border-black px-2 py-1 text-sm font-medium focus:outline-none"
+                    className="w-full border border-[#e2e8f0] rounded-lg px-2 py-1 text-sm font-medium focus:outline-none focus:border-[#ff6600] focus:ring-[3px] focus:ring-[rgba(255,102,0,.12)]"
                   />
                   <div className="flex gap-2">
                     <button
                       onClick={() => { if (editValue.trim()) { correctAnomaly(anomaly.id, editValue.trim()); onClose(); } }}
-                      className="text-xs font-bold px-3 py-1 border-2 border-black bg-green-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] transition-all"
+                      className="text-xs font-semibold px-3 py-1 rounded-lg bg-[#059669] text-white hover:bg-[#047857] transition-colors"
                     >
                       Aplicar
                     </button>
                     <button
                       onClick={() => { setEditingAi(false); setEditValue(initialEditSeed); }}
-                      className="text-xs font-bold px-3 py-1 border-2 border-black bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] transition-all"
+                      className="text-xs font-semibold px-3 py-1 rounded-lg border border-[#e2e8f0] bg-white text-[#1e293b] hover:bg-[#f8fafc] transition-colors"
                     >
                       Cancelar
                     </button>
@@ -206,7 +204,7 @@ export function AnomalyDetailModal({ anomaly, onClose }: Props) {
                 </div>
               ) : (
                 <>
-                  <p className="font-medium text-sm mb-2">{anomaly.aiSuggestion}</p>
+                  <p className="font-medium text-sm mb-2 text-[#1e293b]">{anomaly.aiSuggestion}</p>
                   <div className="flex gap-2 flex-wrap">
                     <button
                       onClick={() => {
@@ -223,19 +221,19 @@ export function AnomalyDetailModal({ anomaly, onClose }: Props) {
                           approveAnomaly(anomaly.id); onClose();
                         }
                       }}
-                      className="text-xs font-bold px-3 py-1 border-2 border-black bg-purple-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] transition-all flex items-center gap-1"
+                      className="text-xs font-semibold px-3 py-1 rounded-lg bg-purple-500 text-white hover:bg-purple-600 transition-colors flex items-center gap-1"
                     >
                       <Check className="w-3 h-3" /> Aceptar IA
                     </button>
                     <button
                       onClick={() => setAiDismissed(true)}
-                      className="text-xs font-bold px-3 py-1 border-2 border-black bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] transition-all flex items-center gap-1"
+                      className="text-xs font-semibold px-3 py-1 rounded-lg border border-[#e2e8f0] bg-white text-[#1e293b] hover:bg-[#f8fafc] transition-colors flex items-center gap-1"
                     >
                       <X className="w-3 h-3" /> Rechazar
                     </button>
                     <button
                       onClick={() => { setEditValue(initialEditSeed); setEditingAi(true); }}
-                      className="text-xs font-bold px-3 py-1 border-2 border-black bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] transition-all flex items-center gap-1"
+                      className="text-xs font-semibold px-3 py-1 rounded-lg border border-[#e2e8f0] bg-white text-[#1e293b] hover:bg-[#f8fafc] transition-colors flex items-center gap-1"
                     >
                       <PenTool className="w-3 h-3" /> Editar
                     </button>
@@ -245,10 +243,10 @@ export function AnomalyDetailModal({ anomaly, onClose }: Props) {
             </div>
           )}
 
-          {/* Edición manual con NL Edit + Vista Previa */}
+          {/* Edición manual NL Edit */}
           {isPending && editingManual && (
-            <div className="space-y-2 border-2 border-black p-3 bg-gray-50">
-              <p className="text-xs font-bold uppercase text-gray-600 mb-1">Editar corrección</p>
+            <div className="space-y-2 border border-[#e2e8f0] rounded-lg p-3 bg-[#f8fafc]">
+              <p className="text-xs font-semibold uppercase text-[#64748b] mb-1">Editar corrección</p>
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -256,13 +254,13 @@ export function AnomalyDetailModal({ anomaly, onClose }: Props) {
                   onChange={(e) => { setManualValue(e.target.value); setPreviewState({ status: "idle" }); }}
                   placeholder="Escribe tu corrección o instrucción en español..."
                   autoFocus
-                  className="flex-1 border-2 border-black px-3 py-2 text-sm font-medium focus:outline-none focus:border-[#0033A0]"
+                  className="flex-1 border border-[#e2e8f0] rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:border-[#ff6600] focus:ring-[3px] focus:ring-[rgba(255,102,0,.12)]"
                 />
                 {isNonEmptyNonLiteral && (
                   <button
                     onClick={handleVistaPrevia}
                     disabled={previewState.status === "loading"}
-                    className="font-bold py-2 px-3 border-2 border-black bg-[#0033A0] text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] transition-all text-xs disabled:opacity-60 flex items-center gap-1 whitespace-nowrap"
+                    className="font-semibold py-2 px-3 rounded-lg bg-[#ff6600] text-white hover:bg-[#cc5200] transition-colors text-xs disabled:opacity-60 flex items-center gap-1 whitespace-nowrap"
                   >
                     {previewState.status === "loading"
                       ? <><Loader2 className="w-3 h-3 animate-spin" /> Analizando...</>
@@ -271,52 +269,49 @@ export function AnomalyDetailModal({ anomaly, onClose }: Props) {
                 )}
               </div>
 
-              {/* Preview éxito */}
               {previewState.status === "success" && (
-                <div className="border-2 border-black p-3 bg-white space-y-2">
-                  <p className="text-sm font-medium">{previewState.result.preview.description}</p>
+                <div className="border border-[#e2e8f0] rounded-lg p-3 bg-white space-y-2">
+                  <p className="text-sm font-medium text-[#1e293b]">{previewState.result.preview.description}</p>
                   <div className="flex items-center gap-2 flex-wrap">
                     {previewState.result.source === "rule" ? (
-                      <span className="text-xs font-bold px-2 py-0.5 bg-green-100 text-green-800 border border-green-400 rounded">⚡ Regla directa</span>
+                      <span className="text-xs font-semibold px-2 py-0.5 bg-[#d1fae5] text-[#059669] border border-[#6ee7b7] rounded">⚡ Regla directa</span>
                     ) : (
-                      <span className="text-xs font-bold px-2 py-0.5 bg-purple-100 text-purple-800 border border-purple-400 rounded">🤖 Interpretado por IA</span>
+                      <span className="text-xs font-semibold px-2 py-0.5 bg-purple-100 text-purple-800 border border-purple-300 rounded">🤖 Interpretado por IA</span>
                     )}
-                    <span className="text-xs text-gray-500">{previewState.result.preview.affectedRows} fila(s) afectada(s)</span>
+                    <span className="text-xs text-[#64748b]">{previewState.result.preview.affectedRows} fila(s) afectada(s)</span>
                   </div>
                   {previewState.result.source === "rule" && !previewState.result.preview.requiresConfirmation ? (
-                    <button onClick={() => handleApplyFromPreview(previewState.result)} className="font-bold py-1 px-4 border-2 border-black bg-green-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] transition-all text-sm">
+                    <button onClick={() => handleApplyFromPreview(previewState.result)} className="font-semibold py-1 px-4 rounded-lg bg-[#059669] text-white hover:bg-[#047857] transition-colors text-sm">
                       Aplicar
                     </button>
                   ) : (
-                    <button onClick={() => handleApplyFromPreview(previewState.result)} className="font-bold py-1 px-4 border-2 border-black bg-purple-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] transition-all text-sm">
+                    <button onClick={() => handleApplyFromPreview(previewState.result)} className="font-semibold py-1 px-4 rounded-lg bg-purple-500 text-white hover:bg-purple-600 transition-colors text-sm">
                       Confirmar
                     </button>
                   )}
                 </div>
               )}
 
-              {/* Preview error — gemini_unavailable */}
               {previewState.status === "error" && previewState.error.error === "gemini_unavailable" && (
-                <div className="border-2 border-red-500 bg-red-50 p-3 flex flex-col gap-2">
-                  <p className="text-sm font-medium text-red-700">{previewState.error.message}</p>
-                  <button onClick={handleVistaPrevia} className="self-start text-xs font-bold px-3 py-1 border-2 border-red-600 bg-white text-red-700 shadow-[2px_2px_0px_0px_rgba(185,28,28,1)] hover:translate-x-[1px] hover:translate-y-[1px] transition-all">Reintentar</button>
+                <div className="border border-[#fca5a5] rounded-lg bg-[#fee2e2] p-3 flex flex-col gap-2">
+                  <p className="text-sm font-medium text-[#dc2626]">{previewState.error.message}</p>
+                  <button onClick={handleVistaPrevia} className="self-start text-xs font-semibold px-3 py-1 rounded-lg border border-[#dc2626] bg-white text-[#dc2626] hover:bg-[#fee2e2] transition-colors">Reintentar</button>
                 </div>
               )}
 
-              {/* Preview error — invalid_instruction */}
               {previewState.status === "error" && previewState.error.error === "invalid_instruction" && (
-                <div className="border-2 border-orange-500 bg-orange-50 p-3">
-                  <p className="text-sm font-medium text-orange-700">{previewState.error.message}</p>
+                <div className="border border-[#fdba74] rounded-lg bg-[#fff7ed] p-3">
+                  <p className="text-sm font-medium text-[#c2410c]">{previewState.error.message}</p>
                 </div>
               )}
 
               <div className="flex gap-2">
                 {!isNonEmptyNonLiteral && manualValue.trim().length > 0 && (
-                  <button onClick={handleApplyLiteral} className="flex-1 font-bold py-2 border-2 border-black bg-green-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] transition-all text-sm">
+                  <button onClick={handleApplyLiteral} className="flex-1 font-semibold py-2 rounded-lg bg-[#059669] text-white hover:bg-[#047857] transition-colors text-sm">
                     Aplicar corrección
                   </button>
                 )}
-                <button onClick={() => { setEditingManual(false); setPreviewState({ status: "idle" }); }} className="font-bold py-2 px-4 border-2 border-black bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] transition-all text-sm">
+                <button onClick={() => { setEditingManual(false); setPreviewState({ status: "idle" }); }} className="font-semibold py-2 px-4 rounded-lg border border-[#e2e8f0] bg-white text-[#1e293b] hover:bg-[#f8fafc] transition-colors text-sm">
                   Cancelar
                 </button>
               </div>
@@ -329,27 +324,27 @@ export function AnomalyDetailModal({ anomaly, onClose }: Props) {
               <>
                 <button
                   onClick={() => { approveAnomaly(anomaly.id); onClose(); }}
-                  className="w-full font-bold py-2 border-2 border-black bg-green-400 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center gap-2"
+                  className="w-full font-semibold py-2.5 rounded-lg bg-[#059669] text-white hover:bg-[#047857] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                 >
                   <Check className="w-4 h-4" /> Aprobar
                 </button>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => { setManualValue(anomaly.userCorrectionText ?? anomaly.userCorrection ?? ""); setPreviewState({ status: "idle" }); setEditingManual(true); }}
-                    className="font-bold py-2 border-2 border-black bg-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center gap-2 text-sm"
+                    className="font-semibold py-2 rounded-lg border border-[#e2e8f0] bg-white text-[#1e293b] hover:bg-[#f8fafc] active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-sm"
                   >
                     <PenTool className="w-4 h-4" /> Editar
                   </button>
                   <button
                     onClick={() => { discardAnomaly(anomaly.id); onClose(); }}
-                    className="font-bold py-2 border-2 border-black bg-red-400 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center gap-2 text-sm"
+                    className="font-semibold py-2 rounded-lg bg-[#dc2626] text-white hover:bg-[#b91c1c] active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-sm"
                   >
                     <X className="w-4 h-4" /> Descartar
                   </button>
                 </div>
               </>
             ) : !isPending ? (
-              <button onClick={handleUndo} className="w-full font-bold py-2 border-2 border-black bg-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all">
+              <button onClick={handleUndo} className="w-full font-semibold py-2.5 rounded-lg border border-[#e2e8f0] bg-white text-[#1e293b] hover:bg-[#f8fafc] active:scale-[0.98] transition-all">
                 Deshacer Acción
               </button>
             ) : null}

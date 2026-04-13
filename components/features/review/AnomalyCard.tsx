@@ -9,13 +9,6 @@ import type { IRCorrection, PreviewResult, PreviewError } from "@/types/ir";
 import { Card } from "@/components/ui/Card";
 import { useSession } from "next-auth/react";
 
-/**
- * Decide si un valor sugerido por la IA es aplicable directo a una celda.
- * Rechaza nulls, cadenas vacías, textos narrativos largos (Gemini a veces
- * devuelve instrucciones en el campo `value` en lugar del literal), y
- * frases con verbos típicos de instrucción ("asigna", "rellena", "elimina",
- * "imputa", etc.) que claramente no son valores.
- */
 function isPlausibleAiValue(v: string | null | undefined): v is string {
   if (v === null || v === undefined) return false;
   if (typeof v !== "string") return false;
@@ -29,20 +22,15 @@ function isPlausibleAiValue(v: string | null | undefined): v is string {
     "elimina", "eliminar",
     "imputa", "imputar",
     "borra", "borrar",
-    "reempla", // reemplaza/reemplazar
+    "reempla",
     "corrige", "corregir",
-    "sugier", // sugiere/sugerir
+    "sugier",
     "usa la media", "usa la moda", "usa la mediana",
   ];
   if (instructionVerbs.some((w) => lower.includes(w))) return false;
   return true;
 }
 
-/**
- * Detects if the trimmed text is a "literal" that can be converted to a
- * FILL_LITERAL IR node locally without calling the backend.
- * Matches: numeric values, "null" (case-insensitive), quoted strings.
- */
 function isLiteralText(text: string): boolean {
   const t = text.trim();
   if (/^-?\d+(\.\d+)?$/.test(t)) return true;
@@ -51,9 +39,6 @@ function isLiteralText(text: string): boolean {
   return false;
 }
 
-/**
- * Build a local FILL_LITERAL IRCorrection from a literal text without calling the backend.
- */
 function buildLiteralIRCorrection(text: string): IRCorrection {
   const t = text.trim();
   let value: string | number | null;
@@ -62,7 +47,6 @@ function buildLiteralIRCorrection(text: string): IRCorrection {
   } else if (/^-?\d+(\.\d+)?$/.test(t)) {
     value = Number(t);
   } else {
-    // Quoted string — strip the quotes
     value = t.slice(1, -1);
   }
   return {
@@ -73,28 +57,17 @@ function buildLiteralIRCorrection(text: string): IRCorrection {
 }
 
 const ANOMALY_DESCRIPTIONS: Record<AnomalyType, (rows: number) => string> = {
-  [ANOMALY_TYPE.FILL_NULLS]: (rows) =>
-    `Se detectaron ${rows} valores nulos (celdas vacías).`,
-  [ANOMALY_TYPE.REMOVE_DUPLICATES]: (rows) =>
-    `${rows} registros duplicados encontrados.`,
-  [ANOMALY_TYPE.TRIM_WHITESPACE]: (rows) =>
-    `${rows} celdas con espacios en blanco innecesarios.`,
-  [ANOMALY_TYPE.FIX_DATE_FORMAT]: (rows) =>
-    `${rows} fechas con formato inconsistente.`,
-  [ANOMALY_TYPE.NORMALIZE_CASE]: (rows) =>
-    `${rows} valores con capitalización inconsistente.`,
-  [ANOMALY_TYPE.REMOVE_OUTLIERS]: (rows) =>
-    `${rows} valores atípicos (outliers) detectados.`,
-  [ANOMALY_TYPE.FIX_PHONE_FORMAT]: (rows) =>
-    `${rows} teléfonos con formato irregular.`,
-  [ANOMALY_TYPE.VALIDATE_EMAIL]: (rows) =>
-    `${rows} emails con formato inválido.`,
-  [ANOMALY_TYPE.STANDARDIZE_ADDRESS]: (rows) =>
-    `${rows} direcciones sin estandarizar.`,
-  [ANOMALY_TYPE.FIX_CURRENCY]: (rows) =>
-    `${rows} valores monetarios con formato inconsistente.`,
-  [ANOMALY_TYPE.MERGE_COLUMNS]: (rows) =>
-    `${rows} registros candidatos para fusión de columnas.`,
+  [ANOMALY_TYPE.FILL_NULLS]: (rows) => `Se detectaron ${rows} valores nulos (celdas vacías).`,
+  [ANOMALY_TYPE.REMOVE_DUPLICATES]: (rows) => `${rows} registros duplicados encontrados.`,
+  [ANOMALY_TYPE.TRIM_WHITESPACE]: (rows) => `${rows} celdas con espacios en blanco innecesarios.`,
+  [ANOMALY_TYPE.FIX_DATE_FORMAT]: (rows) => `${rows} fechas con formato inconsistente.`,
+  [ANOMALY_TYPE.NORMALIZE_CASE]: (rows) => `${rows} valores con capitalización inconsistente.`,
+  [ANOMALY_TYPE.REMOVE_OUTLIERS]: (rows) => `${rows} valores atípicos (outliers) detectados.`,
+  [ANOMALY_TYPE.FIX_PHONE_FORMAT]: (rows) => `${rows} teléfonos con formato irregular.`,
+  [ANOMALY_TYPE.VALIDATE_EMAIL]: (rows) => `${rows} emails con formato inválido.`,
+  [ANOMALY_TYPE.STANDARDIZE_ADDRESS]: (rows) => `${rows} direcciones sin estandarizar.`,
+  [ANOMALY_TYPE.FIX_CURRENCY]: (rows) => `${rows} valores monetarios con formato inconsistente.`,
+  [ANOMALY_TYPE.MERGE_COLUMNS]: (rows) => `${rows} registros candidatos para fusión de columnas.`,
 };
 
 interface AnomalyCardProps {
@@ -126,7 +99,6 @@ export function AnomalyCard({ anomaly }: AnomalyCardProps) {
   const [aiDismissed, setAiDismissed] = useState(false);
   const [editingManual, setEditingManual] = useState(false);
 
-  // Seed the manual input: prefer userCorrectionText (NL re-edit), else empty
   const manualSeed = anomaly.userCorrectionText ?? anomaly.userCorrection ?? "";
   const [manualValue, setManualValue] = useState(manualSeed);
   const [previewState, setPreviewState] = useState<PreviewState>({ status: "idle" });
@@ -151,7 +123,6 @@ export function AnomalyCard({ anomaly }: AnomalyCardProps) {
   };
 
   const handleOpenManualEdit = () => {
-    // Re-seed with NL text if available, else legacy correction or empty
     const seed = anomaly.userCorrectionText ?? anomaly.userCorrection ?? "";
     setManualValue(seed);
     setPreviewState({ status: "idle" });
@@ -211,44 +182,43 @@ export function AnomalyCard({ anomaly }: AnomalyCardProps) {
 
   const handleManualValueChange = (v: string) => {
     setManualValue(v);
-    // Reset preview when input changes
     setPreviewState({ status: "idle" });
   };
 
   return (
     <Card
-      className={`bg-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-6 flex flex-col transition-all${!isPending ? " opacity-60 bg-gray-50" : ""}`}
+      className={`bg-white p-6 flex flex-col transition-all${!isPending ? " opacity-60 bg-gray-50" : ""}`}
     >
-      {/* Header con badge de columna */}
+      {/* Header */}
       <div className="flex justify-between items-start mb-4">
-        <span className="bg-black text-white font-bold px-3 py-1 text-sm inline-block border-2 border-black shadow-[2px_2px_0px_0px_rgba(255,107,0,1)]">
+        <span className="bg-[#1e293b] text-white font-semibold px-3 py-1 text-sm rounded-md">
           Columna: {anomaly.column}
         </span>
-        {isApproved && <CheckCircle2 className="w-8 h-8 text-green-600" />}
-        {isDiscarded && <X className="w-8 h-8 text-red-600" />}
+        {isApproved && <CheckCircle2 className="w-8 h-8 text-[#059669]" />}
+        {isDiscarded && <X className="w-8 h-8 text-[#dc2626]" />}
       </div>
 
       {/* Contenido */}
       <div className="flex-1 space-y-4 mb-6">
         <div>
-          <p className="text-xs font-bold uppercase text-gray-500 mb-1">
+          <p className="text-xs font-semibold uppercase text-[#64748b] mb-1">
             Anomalía Detectada
           </p>
-          <p className="font-bold text-lg">{description}</p>
+          <p className="font-semibold text-lg text-[#1e293b]">{description}</p>
         </div>
         {!anomaly.aiSuggestion && (
-          <div className="bg-blue-50 p-3 border-l-4 border-[#0033A0]">
-            <p className="text-xs font-bold uppercase text-[#0033A0] mb-1">
+          <div className="bg-[#dbeafe] p-3 rounded-lg border-l-4 border-[#1d4ed8]">
+            <p className="text-xs font-semibold uppercase text-[#1d4ed8] mb-1">
               Sugerencia IA
             </p>
-            <p className="font-medium">{anomaly.suggestedFix}</p>
+            <p className="font-medium text-[#1e293b] text-sm">{anomaly.suggestedFix}</p>
           </div>
         )}
 
-        {/* Sugerencia Gemini — solo si está disponible y la anomalía está pendiente */}
+        {/* Sugerencia Gemini */}
         {anomaly.aiSuggestion && isPending && !aiDismissed && (
-          <div className="bg-purple-50 p-3 border-l-4 border-purple-500">
-            <p className="text-xs font-bold uppercase text-purple-700 mb-1 flex items-center gap-1">
+          <div className="bg-purple-50 p-3 rounded-lg border-l-4 border-purple-500">
+            <p className="text-xs font-semibold uppercase text-purple-700 mb-1 flex items-center gap-1">
               <Sparkles className="w-3 h-3" /> Gemini AI
             </p>
             {editingAi ? (
@@ -257,7 +227,7 @@ export function AnomalyCard({ anomaly }: AnomalyCardProps) {
                   type="text"
                   value={editValue}
                   onChange={(e) => setEditValue(e.target.value)}
-                  className="w-full border-2 border-black px-2 py-1 text-sm font-medium focus:outline-none"
+                  className="w-full border border-[#e2e8f0] rounded-lg px-2 py-1 text-sm font-medium focus:outline-none focus:border-[#ff6600] focus:ring-[3px] focus:ring-[rgba(255,102,0,.12)]"
                 />
                 <div className="flex gap-2">
                   <button
@@ -267,7 +237,7 @@ export function AnomalyCard({ anomaly }: AnomalyCardProps) {
                         setEditingAi(false);
                       }
                     }}
-                    className="text-xs font-bold px-3 py-1 border-2 border-black bg-green-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all"
+                    className="text-xs font-semibold px-3 py-1 rounded-lg bg-[#059669] text-white hover:bg-[#047857] transition-colors"
                   >
                     Aplicar
                   </button>
@@ -281,7 +251,7 @@ export function AnomalyCard({ anomaly }: AnomalyCardProps) {
                           : "";
                       setEditValue(seed);
                     }}
-                    className="text-xs font-bold px-3 py-1 border-2 border-black bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all"
+                    className="text-xs font-semibold px-3 py-1 rounded-lg border border-[#e2e8f0] bg-white text-[#1e293b] hover:bg-[#f8fafc] transition-colors"
                   >
                     Cancelar
                   </button>
@@ -289,16 +259,13 @@ export function AnomalyCard({ anomaly }: AnomalyCardProps) {
               </div>
             ) : (
               <>
-                <p className="font-medium text-sm mb-2">{anomaly.aiSuggestion}</p>
+                <p className="font-medium text-sm mb-2 text-[#1e293b]">{anomaly.aiSuggestion}</p>
                 <div className="flex gap-2 flex-wrap">
                   <button
                     onClick={() => {
                       if (anomaly.aiActionType === 'DELETE') {
                         discardAnomaly(anomaly.id);
                       } else if (anomaly.aiActionType === 'FILL') {
-                        // Solo auto-aplicar si el valor de Gemini es plausible;
-                        // si no, abrir el editor para que el usuario lo revise/corrija
-                        // (evita que una instrucción narrativa termine en la celda).
                         if (isPlausibleAiValue(anomaly.aiActionValue)) {
                           correctAnomaly(anomaly.id, anomaly.aiActionValue);
                         } else {
@@ -309,13 +276,13 @@ export function AnomalyCard({ anomaly }: AnomalyCardProps) {
                         approveAnomaly(anomaly.id);
                       }
                     }}
-                    className="text-xs font-bold px-3 py-1 border-2 border-black bg-purple-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-1"
+                    className="text-xs font-semibold px-3 py-1 rounded-lg bg-purple-500 text-white hover:bg-purple-600 transition-colors flex items-center gap-1"
                   >
                     <Check className="w-3 h-3" /> Aceptar IA
                   </button>
                   <button
                     onClick={() => setAiDismissed(true)}
-                    className="text-xs font-bold px-3 py-1 border-2 border-black bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-1"
+                    className="text-xs font-semibold px-3 py-1 rounded-lg border border-[#e2e8f0] bg-white text-[#1e293b] hover:bg-[#f8fafc] transition-colors flex items-center gap-1"
                   >
                     <X className="w-3 h-3" /> Rechazar
                   </button>
@@ -329,7 +296,7 @@ export function AnomalyCard({ anomaly }: AnomalyCardProps) {
                       setEditValue(seed);
                       setEditingAi(true);
                     }}
-                    className="text-xs font-bold px-3 py-1 border-2 border-black bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-1"
+                    className="text-xs font-semibold px-3 py-1 rounded-lg border border-[#e2e8f0] bg-white text-[#1e293b] hover:bg-[#f8fafc] transition-colors flex items-center gap-1"
                   >
                     <PenTool className="w-3 h-3" /> Editar
                   </button>
@@ -345,19 +312,19 @@ export function AnomalyCard({ anomaly }: AnomalyCardProps) {
         <div className="grid grid-cols-2 gap-2 mt-auto">
           <button
             onClick={() => approveAnomaly(anomaly.id)}
-            className="col-span-2 font-bold py-2 px-6 border-2 border-black bg-green-400 text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all duration-150 flex items-center justify-center gap-2"
+            className="col-span-2 font-semibold py-2 px-6 rounded-lg bg-[#059669] text-white hover:bg-[#047857] active:scale-[0.98] transition-all duration-150 flex items-center justify-center gap-2"
           >
             <Check className="w-4 h-4" /> Aprobar Regla
           </button>
           <button
             onClick={() => discardAnomaly(anomaly.id)}
-            className="font-bold py-2 px-6 border-2 border-black bg-red-400 text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all duration-150 flex items-center justify-center gap-2"
+            className="font-semibold py-2 px-6 rounded-lg bg-[#dc2626] text-white hover:bg-[#b91c1c] active:scale-[0.98] transition-all duration-150 flex items-center justify-center gap-2"
           >
             <X className="w-4 h-4" /> Descartar
           </button>
           <button
             onClick={handleOpenManualEdit}
-            className="font-bold py-2 px-6 border-2 border-black bg-white text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all duration-150 flex items-center justify-center gap-2"
+            className="font-semibold py-2 px-6 rounded-lg border border-[#e2e8f0] bg-white text-[#1e293b] hover:bg-[#f8fafc] active:scale-[0.98] transition-all duration-150 flex items-center justify-center gap-2"
           >
             <PenTool className="w-4 h-4" /> Editar
           </button>
@@ -370,19 +337,16 @@ export function AnomalyCard({ anomaly }: AnomalyCardProps) {
                   onChange={(e) => handleManualValueChange(e.target.value)}
                   placeholder="Escribe tu corrección o instrucción en español..."
                   autoFocus
-                  className="flex-1 border-2 border-black px-3 py-2 font-medium focus:outline-none focus:border-[#0033A0]"
+                  className="flex-1 border border-[#e2e8f0] rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:border-[#ff6600] focus:ring-[3px] focus:ring-[rgba(255,102,0,.12)]"
                 />
-                {/* Vista previa — solo para instrucciones NL (no literales) */}
                 {isNonEmptyNonLiteral && (
                   <button
                     onClick={handleVistaPrevia}
                     disabled={previewState.status === "loading"}
-                    className="font-bold py-2 px-3 border-2 border-black bg-[#0033A0] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all text-sm disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-1 whitespace-nowrap"
+                    className="font-semibold py-2 px-3 rounded-lg bg-[#ff6600] text-white hover:bg-[#cc5200] transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-1 whitespace-nowrap"
                   >
                     {previewState.status === "loading" ? (
-                      <>
-                        <Loader2 className="w-3 h-3 animate-spin" /> Analizando...
-                      </>
+                      <><Loader2 className="w-3 h-3 animate-spin" /> Analizando...</>
                     ) : (
                       "Vista previa"
                     )}
@@ -390,36 +354,34 @@ export function AnomalyCard({ anomaly }: AnomalyCardProps) {
                 )}
               </div>
 
-              {/* Panel de preview — éxito */}
               {previewState.status === "success" && (
-                <div className="border-2 border-black p-3 space-y-2 bg-gray-50">
-                  <p className="text-sm font-medium">{previewState.result.preview.description}</p>
+                <div className="border border-[#e2e8f0] rounded-lg p-3 space-y-2 bg-[#f8fafc]">
+                  <p className="text-sm font-medium text-[#1e293b]">{previewState.result.preview.description}</p>
                   <div className="flex items-center gap-2 flex-wrap">
                     {previewState.result.source === "rule" ? (
-                      <span className="text-xs font-bold px-2 py-0.5 bg-green-100 text-green-800 border border-green-400 rounded">
+                      <span className="text-xs font-semibold px-2 py-0.5 bg-[#d1fae5] text-[#059669] border border-[#6ee7b7] rounded">
                         ⚡ Regla directa
                       </span>
                     ) : (
-                      <span className="text-xs font-bold px-2 py-0.5 bg-purple-100 text-purple-800 border border-purple-400 rounded">
+                      <span className="text-xs font-semibold px-2 py-0.5 bg-purple-100 text-purple-800 border border-purple-300 rounded">
                         🤖 Interpretado por IA
                       </span>
                     )}
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-[#64748b]">
                       {previewState.result.preview.affectedRows} fila(s) afectada(s)
                     </span>
                   </div>
-                  {/* Aplicar (rule directa) o Confirmar (gemini con requiresConfirmation) */}
                   {previewState.result.source === "rule" && !previewState.result.preview.requiresConfirmation ? (
                     <button
                       onClick={() => handleApplyFromPreview(previewState.result)}
-                      className="font-bold py-1 px-4 border-2 border-black bg-green-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all text-sm"
+                      className="font-semibold py-1 px-4 rounded-lg bg-[#059669] text-white hover:bg-[#047857] transition-colors text-sm"
                     >
                       Aplicar
                     </button>
                   ) : (
                     <button
                       onClick={() => handleApplyFromPreview(previewState.result)}
-                      className="font-bold py-1 px-4 border-2 border-black bg-purple-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all text-sm"
+                      className="font-semibold py-1 px-4 rounded-lg bg-purple-500 text-white hover:bg-purple-600 transition-colors text-sm"
                     >
                       Confirmar
                     </button>
@@ -427,40 +389,36 @@ export function AnomalyCard({ anomaly }: AnomalyCardProps) {
                 </div>
               )}
 
-              {/* Panel de error — gemini_unavailable */}
               {previewState.status === "error" && previewState.error.error === "gemini_unavailable" && (
-                <div className="border-2 border-red-500 bg-red-50 p-3 flex flex-col gap-2">
-                  <p className="text-sm font-medium text-red-700">{previewState.error.message}</p>
+                <div className="border border-[#fca5a5] rounded-lg bg-[#fee2e2] p-3 flex flex-col gap-2">
+                  <p className="text-sm font-medium text-[#dc2626]">{previewState.error.message}</p>
                   <button
                     onClick={handleVistaPrevia}
-                    className="self-start text-xs font-bold px-3 py-1 border-2 border-red-600 bg-white text-red-700 shadow-[2px_2px_0px_0px_rgba(185,28,28,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(185,28,28,1)] transition-all"
+                    className="self-start text-xs font-semibold px-3 py-1 rounded-lg border border-[#dc2626] bg-white text-[#dc2626] hover:bg-[#fee2e2] transition-colors"
                   >
                     Reintentar
                   </button>
                 </div>
               )}
 
-              {/* Panel de error — invalid_instruction */}
               {previewState.status === "error" && previewState.error.error === "invalid_instruction" && (
-                <div className="border-2 border-orange-500 bg-orange-50 p-3">
-                  <p className="text-sm font-medium text-orange-700">{previewState.error.message}</p>
+                <div className="border border-[#fdba74] rounded-lg bg-[#fff7ed] p-3">
+                  <p className="text-sm font-medium text-[#c2410c]">{previewState.error.message}</p>
                 </div>
               )}
 
-              {/* Botones de acción del modo edición */}
               <div className="flex gap-2">
-                {/* Aplicar directo solo para literales (no-NL) */}
                 {!isNonEmptyNonLiteral && manualValue.trim().length > 0 && (
                   <button
                     onClick={handleApplyLiteral}
-                    className="flex-1 font-bold py-2 border-2 border-black bg-green-400 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all text-sm"
+                    className="flex-1 font-semibold py-2 rounded-lg bg-[#059669] text-white hover:bg-[#047857] transition-colors text-sm"
                   >
                     Aplicar corrección
                   </button>
                 )}
                 <button
                   onClick={handleCancelManualEdit}
-                  className="font-bold py-2 px-4 border-2 border-black bg-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all text-sm"
+                  className="font-semibold py-2 px-4 rounded-lg border border-[#e2e8f0] bg-white text-[#1e293b] hover:bg-[#f8fafc] transition-colors text-sm"
                 >
                   Cancelar
                 </button>
@@ -472,7 +430,7 @@ export function AnomalyCard({ anomaly }: AnomalyCardProps) {
         <div className="mt-auto">
           <button
             onClick={handleUndo}
-            className="w-full font-bold py-2 px-6 border-2 border-black bg-white text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all duration-150 flex items-center justify-center gap-2"
+            className="w-full font-semibold py-2 px-6 rounded-lg border border-[#e2e8f0] bg-white text-[#1e293b] hover:bg-[#f8fafc] active:scale-[0.98] transition-all duration-150 flex items-center justify-center gap-2"
           >
             Deshacer Acción
           </button>
