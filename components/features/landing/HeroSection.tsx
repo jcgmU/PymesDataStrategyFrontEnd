@@ -4,29 +4,29 @@ import { ChevronRight } from "lucide-react";
 export function HeroSection() {
   return (
     <section className="py-20 px-6 text-center max-w-5xl mx-auto flex flex-col items-center">
-      {/* Badge exclusivo */}
-      <div className="inline-block bg-[#0033A0] text-white font-bold px-6 py-2 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -rotate-2 mb-10">
+      {/* Badge */}
+      <div className="inline-block bg-[#fff0e6] text-[#ff6600] font-semibold px-5 py-2 rounded-full text-sm mb-10 border border-[#ffcba4]">
         EXCLUSIVO PARA PYMES EN BOGOTÁ
       </div>
 
       {/* Headline */}
-      <h1 className="text-6xl md:text-8xl font-black tracking-tighter uppercase leading-[0.9] text-[#18181B] mb-8">
+      <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.05] text-[#1e293b] mb-8">
         Limpia tus Datos.{" "}
         <br />
-        <span className="text-[#FF6B00]">Multiplica tu Valor.</span>
+        <span className="text-[#ff6600]">Multiplica tu Valor.</span>
       </h1>
 
       {/* Subheadline */}
-      <p className="text-xl md:text-2xl font-bold max-w-3xl text-gray-700 mb-12 border-b-4 border-black pb-8">
+      <p className="text-xl md:text-2xl font-medium max-w-3xl text-[#64748b] mb-12 leading-relaxed">
         Deja de perder horas ordenando Excels manualmente. Nuestro Agente de
         Inteligencia Artificial audita, estandariza y limpia hasta 50.000
         registros en minutos.
       </p>
 
-      {/* CTA animado */}
+      {/* CTA */}
       <Link
         href="/dashboard"
-        className="inline-flex items-center gap-2 animate-bounce bg-[#FF6B00] text-white font-bold py-3 px-8 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all duration-150 text-lg"
+        className="inline-flex items-center gap-2 animate-bounce bg-[#ff6600] text-white font-semibold py-3 px-8 rounded-xl hover:bg-[#cc5200] hover:shadow-[0_4px_12px_rgba(255,102,0,.3)] active:scale-[0.98] transition-all duration-150 text-lg"
       >
         Inicia tu Transformación
         <ChevronRight className="w-5 h-5" />

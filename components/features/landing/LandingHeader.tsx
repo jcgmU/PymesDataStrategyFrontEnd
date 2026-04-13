@@ -1,39 +1,39 @@
 import Link from "next/link";
-import { Database } from "lucide-react";
+import { LogoMark } from "@/components/ui";
 
 export function LandingHeader() {
   return (
-    <header className="sticky top-0 z-50 bg-[#F4F4F5] border-b-4 border-black">
+    <header className="sticky top-0 z-50 bg-white border-b border-[#e2e8f0] shadow-[0_1px_3px_rgba(0,0,0,.06)]">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-black text-xl text-[#18181B]">
-          <Database className="w-7 h-7 text-[#FF6B00]" />
-          <span>Data<span className="text-[#0033A0]">Strategy</span></span>
+        <Link href="/" className="flex items-center gap-2">
+          <LogoMark size={28} color="#ff6600" />
+          <span className="font-bold text-lg text-[#1e293b]">PYMES-AI</span>
         </Link>
 
         {/* Nav links — desktop only */}
         <nav className="hidden md:flex items-center gap-8">
           <Link
             href="#como-funciona"
-            className="font-bold text-[#18181B] hover:text-[#FF6B00] transition-colors duration-150"
+            className="text-sm font-medium text-[#64748b] hover:text-[#ff6600] transition-colors duration-150"
           >
             Cómo Funciona
           </Link>
           <Link
             href="#beneficios"
-            className="font-bold text-[#18181B] hover:text-[#FF6B00] transition-colors duration-150"
+            className="text-sm font-medium text-[#64748b] hover:text-[#ff6600] transition-colors duration-150"
           >
             Beneficios
           </Link>
           <Link
             href="#seguridad"
-            className="font-bold text-[#18181B] hover:text-[#FF6B00] transition-colors duration-150"
+            className="text-sm font-medium text-[#64748b] hover:text-[#ff6600] transition-colors duration-150"
           >
             Seguridad IA
           </Link>
           <Link
             href="#faq"
-            className="font-bold text-[#18181B] hover:text-[#FF6B00] transition-colors duration-150"
+            className="text-sm font-medium text-[#64748b] hover:text-[#ff6600] transition-colors duration-150"
           >
             FAQ
           </Link>
@@ -41,17 +41,15 @@ export function LandingHeader() {
 
         {/* CTA Buttons */}
         <div className="flex items-center gap-3">
-          {/* Ghost button — Iniciar Sesión */}
           <Link
-            href="/dashboard"
-            className="font-bold py-2 px-5 border-2 border-black bg-transparent text-[#18181B] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all duration-150"
+            href="/login"
+            className="text-sm font-semibold text-[#1e293b] px-4 py-2 rounded-lg border border-[#e2e8f0] hover:bg-[#f8fafc] transition-all duration-150"
           >
             Iniciar Sesión
           </Link>
-          {/* Primary button — Dashboard */}
           <Link
             href="/dashboard"
-            className="font-bold py-2 px-5 border-2 border-black bg-[#FF6B00] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all duration-150"
+            className="text-sm font-semibold bg-[#ff6600] text-white px-4 py-2 rounded-lg hover:bg-[#cc5200] hover:shadow-[0_4px_12px_rgba(255,102,0,.3)] active:scale-[0.98] transition-all duration-150"
           >
             Dashboard
           </Link>

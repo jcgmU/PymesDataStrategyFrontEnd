@@ -28,36 +28,36 @@ export function HowItWorks() {
   return (
     <section
       id="como-funciona"
-      className="py-24 px-6 bg-white border-y-4 border-black"
+      className="py-24 px-6 bg-white border-y border-[#e2e8f0]"
     >
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-4xl md:text-5xl font-black uppercase text-center mb-16 text-[#18181B]">
+        <h2 className="text-4xl md:text-5xl font-extrabold text-center mb-16 text-[#1e293b]">
           Cómo Funciona
         </h2>
 
         <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
           {/* Horizontal connector — desktop only */}
           <div
-            className="hidden md:block absolute top-7 left-[calc(16.67%+1.5rem)] right-[calc(16.67%+1.5rem)] h-[4px] bg-black"
+            className="hidden md:block absolute top-7 left-[calc(16.67%+1.5rem)] right-[calc(16.67%+1.5rem)] h-px bg-[#e2e8f0]"
             aria-hidden="true"
           />
 
           {steps.map(({ number, icon: Icon, title, description }) => (
             <div key={number} className="relative flex flex-col items-center h-full">
               {/* Step number badge */}
-              <div className="relative z-10 w-14 h-14 rounded-full bg-[#FF6B00] border-4 border-black flex items-center justify-center mb-6 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] shrink-0">
-                <span className="text-white font-black text-xl">{number}</span>
+              <div className="relative z-10 w-14 h-14 rounded-full bg-[#ff6600] flex items-center justify-center mb-6 shrink-0">
+                <span className="text-white font-bold text-xl">{number}</span>
               </div>
 
-              {/* Card — flex-1 para que las tres ocupen el mismo alto */}
-              <div className="flex-1 w-full bg-white border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-6 text-center">
+              {/* Card */}
+              <div className="flex-1 w-full bg-white rounded-[10px] shadow-[0_1px_3px_rgba(0,0,0,.08),0_4px_16px_rgba(0,0,0,.04)] p-6 text-center">
                 <div className="flex justify-center mb-4">
-                  <Icon className="w-10 h-10 text-[#0033A0]" />
+                  <Icon className="w-10 h-10 text-[#ff6600]" />
                 </div>
-                <h3 className="text-xl font-black uppercase mb-3 text-[#18181B]">
+                <h3 className="text-xl font-bold mb-3 text-[#1e293b]">
                   {title}
                 </h3>
-                <p className="text-gray-700 font-medium leading-relaxed">
+                <p className="text-[#64748b] font-medium leading-relaxed">
                   {description}
                 </p>
               </div>

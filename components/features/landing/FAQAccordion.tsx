@@ -34,46 +34,45 @@ export function FAQAccordion() {
   };
 
   return (
-    <section id="faq" className="py-24 px-6 bg-[#F4F4F5] border-t-4 border-black">
+    <section id="faq" className="py-24 px-6 bg-[#f1f5f9]">
       <div className="max-w-3xl mx-auto">
-        <h2 className="text-4xl md:text-5xl font-black uppercase text-center mb-12 text-[#18181B]">
+        <h2 className="text-4xl md:text-5xl font-extrabold text-center mb-12 text-[#1e293b]">
           Preguntas Frecuentes
         </h2>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {faqItems.map((item, index) => {
             const isOpen = openIndex === index;
             return (
               <div
                 key={index}
-                className="bg-white border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+                className="bg-white rounded-[10px] shadow-[0_1px_3px_rgba(0,0,0,.08)] overflow-hidden"
               >
                 <button
                   onClick={() => handleToggle(index)}
                   className="w-full flex items-center justify-between p-6 text-left"
                   aria-expanded={isOpen}
                 >
-                  <span className="text-lg font-black text-[#18181B] pr-4">
+                  <span className="text-base font-semibold text-[#1e293b] pr-4">
                     {item.question}
                   </span>
                   <ChevronDown
-                    className={`text-[#FF6B00] shrink-0 transition-transform duration-300 ease-in-out ${
+                    className={`text-[#ff6600] shrink-0 transition-transform duration-300 ease-in-out ${
                       isOpen ? "rotate-180" : "rotate-0"
                     }`}
-                    size={24}
+                    size={20}
                     strokeWidth={2.5}
                   />
                 </button>
 
-                {/* Contenedor animado con grid trick */}
                 <div
                   className={`grid transition-all duration-300 ease-in-out ${
                     isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
                   }`}
                 >
                   <div className="overflow-hidden">
-                    <div className="px-6 pb-6 border-t-2 border-black">
-                      <p className="text-[#18181B] font-medium leading-relaxed pt-4">
+                    <div className="px-6 pb-6 border-t border-[#e2e8f0]">
+                      <p className="text-[#64748b] font-medium leading-relaxed pt-4">
                         {item.answer}
                       </p>
                     </div>

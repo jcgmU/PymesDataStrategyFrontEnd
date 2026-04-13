@@ -24,7 +24,7 @@ const cases = [
 export function UseCases() {
   return (
     <section id="beneficios" className="py-24 px-6 max-w-6xl mx-auto w-full">
-      <h2 className="text-4xl md:text-5xl font-black uppercase text-center mb-16 text-[#18181B]">
+      <h2 className="text-4xl md:text-5xl font-extrabold text-center mb-16 text-[#1e293b]">
         Diseñado para cada área
       </h2>
       <div className="grid md:grid-cols-3 gap-8">
@@ -33,15 +33,15 @@ export function UseCases() {
           return (
             <div
               key={item.title}
-              className="bg-white border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-6 hover:-translate-y-2 transition-transform"
+              className="bg-white rounded-[10px] shadow-[0_1px_3px_rgba(0,0,0,.08),0_4px_16px_rgba(0,0,0,.04)] p-6 transition-all duration-150 hover:shadow-[0_4px_6px_rgba(0,0,0,.07),0_10px_30px_rgba(0,0,0,.06)] hover:-translate-y-1"
             >
               <div className="mb-4">
-                <Icon className="text-[#FF6B00]" size={40} strokeWidth={2.5} />
+                <Icon className="text-[#ff6600]" size={40} strokeWidth={2} />
               </div>
-              <h3 className="text-2xl font-black uppercase text-[#18181B] mb-3">
+              <h3 className="text-xl font-bold text-[#1e293b] mb-3">
                 {item.title}
               </h3>
-              <p className="text-[#18181B] font-medium leading-relaxed">
+              <p className="text-[#64748b] font-medium leading-relaxed">
                 {item.description}
               </p>
             </div>
