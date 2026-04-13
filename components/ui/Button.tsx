@@ -14,10 +14,10 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: "bg-primary text-text-inverted hover:bg-primary-hover active:bg-primary-active",
-  secondary: "bg-secondary text-text-inverted hover:bg-secondary-hover active:bg-secondary-active",
-  outline: "bg-transparent text-text border-2 border-black hover:bg-surface",
-  ghost: "bg-transparent text-text hover:bg-surface border-transparent",
+  primary:   "bg-[#ff6600] text-white hover:bg-[#cc5200] hover:shadow-[0_4px_12px_rgba(255,102,0,.3)]",
+  secondary: "bg-[#1e293b] text-white hover:bg-[#0f172a]",
+  outline:   "bg-transparent text-[#1e293b] border border-[#e2e8f0] hover:bg-[#f8fafc]",
+  ghost:     "bg-transparent text-[#1e293b] hover:bg-[#f1f5f9]",
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
@@ -42,25 +42,16 @@ export function Button({
       disabled={isDisabled}
       className={cn(
         // Base styles
-        "inline-flex items-center justify-center font-semibold",
-        "border-2 border-black rounded-md",
-        "shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]",
+        "inline-flex items-center justify-center font-semibold rounded-lg",
         "transition-all duration-150",
-        // Hover press effect (only when not disabled)
-        !isDisabled && [
-          "hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]",
-          "hover:translate-x-[2px] hover:translate-y-[2px]",
-          "active:shadow-none",
-          "active:translate-x-[4px] active:translate-y-[4px]",
-        ],
+        // Active press effect (only when not disabled)
+        !isDisabled && "active:scale-[0.98]",
         // Variant styles
         variantStyles[variant],
         // Size styles
         sizeStyles[size],
         // Disabled state
-        isDisabled && "opacity-50 cursor-not-allowed",
-        // Ghost variant removes shadow
-        variant === "ghost" && "shadow-none border-0",
+        isDisabled && "opacity-55 cursor-not-allowed",
         className
       )}
       {...props}

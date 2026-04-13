@@ -12,14 +12,12 @@ export function Card({ className, children, hoverable = false }: CardProps) {
     <div
       className={cn(
         // Base styles
-        "bg-surface rounded-md",
-        "border-2 border-black",
-        "shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]",
+        "bg-white rounded-[10px]",
+        "shadow-[0_1px_3px_rgba(0,0,0,.08),0_4px_16px_rgba(0,0,0,.04)]",
         // Hover effect (optional)
         hoverable && [
           "transition-all duration-150",
-          "hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]",
-          "hover:translate-x-[2px] hover:translate-y-[2px]",
+          "hover:shadow-[0_4px_6px_rgba(0,0,0,.07),0_10px_30px_rgba(0,0,0,.06)]",
         ],
         className
       )}

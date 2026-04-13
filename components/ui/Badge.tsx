@@ -10,11 +10,11 @@ interface BadgeProps {
 }
 
 const variantStyles: Record<BadgeVariant, string> = {
-  default: "bg-surface text-text",
-  success: "bg-success text-text-inverted",
-  warning: "bg-warning text-text",
-  error: "bg-error text-text-inverted",
-  info: "bg-secondary text-text-inverted",
+  default: "bg-[#f1f5f9] text-[#64748b]",
+  success: "bg-[#d1fae5] text-[#059669]",
+  warning: "bg-[#fef3c7] text-[#d97706]",
+  error:   "bg-[#fee2e2] text-[#dc2626]",
+  info:    "bg-[#dbeafe] text-[#1d4ed8]",
 };
 
 export function Badge({
@@ -25,12 +25,8 @@ export function Badge({
   return (
     <span
       className={cn(
-        // Base styles
         "inline-flex items-center px-2.5 py-0.5",
-        "text-xs font-semibold",
-        "border-2 border-black rounded-md",
-        "shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]",
-        // Variant styles
+        "text-xs font-semibold rounded-full",
         variantStyles[variant],
         className
       )}

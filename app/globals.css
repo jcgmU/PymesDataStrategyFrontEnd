@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 /* ==========================================================================
-   Neo-Brutalism Soft UI - Design System
-   Paleta Compensar + Brutal shadows
+   PymesDataStrategy — Design System
+   Identidad visual soft SaaS B2B
    ========================================================================== */
 
 @theme {
@@ -10,66 +10,58 @@
   --font-sans: "Inter", system-ui, sans-serif;
   --font-mono: ui-monospace, "Cascadia Code", monospace;
 
-  /* Primary Colors - Compensar Palette (OKLCH) */
-  --color-primary: oklch(65% 0.22 35);
-  --color-primary-hover: oklch(60% 0.22 35);
-  --color-primary-active: oklch(55% 0.22 35);
-  
-  --color-secondary: oklch(27% 0.12 264);
-  --color-secondary-hover: oklch(32% 0.12 264);
-  --color-secondary-active: oklch(22% 0.12 264);
+  /* Primary — naranja */
+  --color-primary:       #ff6600;
+  --color-primary-hover: #cc5200;
+  --color-primary-light: #fff0e6;
 
-  /* Background & Surface */
-  --color-background: oklch(98% 0 0);
-  --color-surface: #ffffff;
+  /* Backgrounds */
+  --color-background:    #f1f5f9;
+  --color-surface:       #ffffff;
   --color-surface-elevated: #ffffff;
 
+  /* Sidebar */
+  --color-sidebar-bg:    #1a1a1a;
+  --color-sidebar-text:  #94a3b8;
+  --color-sidebar-hover: #2d2d2d;
+
   /* Text */
-  --color-text: oklch(15% 0 0);
-  --color-text-muted: oklch(55% 0.02 250);
+  --color-text:          #1e293b;
+  --color-text-muted:    #64748b;
   --color-text-inverted: #ffffff;
 
-  /* Semantic Colors */
-  --color-success: oklch(72% 0.19 145);
-  --color-success-hover: oklch(67% 0.19 145);
-  --color-warning: oklch(75% 0.18 70);
-  --color-warning-hover: oklch(70% 0.18 70);
-  --color-error: oklch(63% 0.22 25);
-  --color-error-hover: oklch(58% 0.22 25);
+  /* Border */
+  --color-border:        #e2e8f0;
+  --color-border-muted:  #f1f5f9;
 
-  /* Borders */
-  --color-border: #000000;
-  --color-border-muted: oklch(80% 0 0);
-
+  /* Semantic */
+  --color-success:       #059669;
+  --color-success-light: #d1fae5;
+  --color-warning:       #d97706;
+  --color-warning-light: #fef3c7;
+  --color-error:         #dc2626;
+  --color-error-light:   #fee2e2;
 }
 
-/* Spacing & Radius tokens — outside @theme to avoid overriding Tailwind's
-   built-in utility scales (max-w-lg, rounded-lg, gap-lg, etc.) */
+/* Spacing & Radius tokens */
 :root {
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
+  --spacing-xs:  0.25rem;
+  --spacing-sm:  0.5rem;
+  --spacing-md:  1rem;
+  --spacing-lg:  1.5rem;
+  --spacing-xl:  2rem;
   --spacing-2xl: 3rem;
 
   --radius-none: 0;
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
+  --radius-sm:   0.25rem;
+  --radius-md:   0.5rem;
+  --radius-lg:   0.75rem;
   --radius-full: 9999px;
-}
 
-/* ==========================================================================
-   Neo-Brutalism Shadows (CSS Custom Properties)
-   ========================================================================== */
-:root {
-  --shadow-brutal: 4px 4px 0px 0px rgba(0, 0, 0, 1);
-  --shadow-brutal-sm: 2px 2px 0px 0px rgba(0, 0, 0, 1);
-  --shadow-brutal-hover: 2px 2px 0px 0px rgba(0, 0, 0, 1);
-  --shadow-brutal-lg: 6px 6px 0px 0px rgba(0, 0, 0, 1);
-  --shadow-brutal-primary: 4px 4px 0px 0px oklch(65% 0.22 35);
-  --shadow-brutal-secondary: 4px 4px 0px 0px oklch(27% 0.12 264);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 10px 30px rgba(0,0,0,.06);
+  --radius: 10px;
+  --sidebar-w: 240px;
 }
 
 /* ==========================================================================
@@ -87,49 +79,23 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+button { cursor: pointer; font-family: inherit; }
+input, select, textarea { font-family: inherit; }
+a { text-decoration: none; color: inherit; }
+
 /* ==========================================================================
-   Neo-Brutalism Utility Classes
+   Soft Shadow Utilities
    ========================================================================== */
-.shadow-brutal {
-  box-shadow: var(--shadow-brutal);
+.shadow-soft {
+  box-shadow: var(--shadow-sm);
 }
 
-.shadow-brutal-sm {
-  box-shadow: var(--shadow-brutal-sm);
+.shadow-soft-md {
+  box-shadow: var(--shadow-md);
 }
 
-.shadow-brutal-lg {
-  box-shadow: var(--shadow-brutal-lg);
-}
-
-.shadow-brutal-primary {
-  box-shadow: var(--shadow-brutal-primary);
-}
-
-.shadow-brutal-secondary {
-  box-shadow: var(--shadow-brutal-secondary);
-}
-
-/* Hover transition for brutal shadow effect */
-.brutal-hover {
-  transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
-}
-
-.brutal-hover:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: var(--shadow-brutal-lg);
-}
-
-.brutal-hover:active {
-  transform: translate(2px, 2px);
-  box-shadow: var(--shadow-brutal-sm);
-}
-
-/* Neo-Brutalism border style */
-.border-brutal {
-  border: 2px solid var(--color-border);
-}
-
-.border-brutal-thick {
-  border: 3px solid var(--color-border);
+.card-base {
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
 }

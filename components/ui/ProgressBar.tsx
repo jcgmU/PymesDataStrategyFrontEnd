@@ -35,9 +35,7 @@ export function ProgressBar({
     <div
       className={cn(
         // Base container styles
-        "relative w-full bg-surface rounded-sm overflow-hidden",
-        "border-2 border-black",
-        "shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]",
+        "relative w-full bg-[#e2e8f0] rounded-full overflow-hidden",
         sizeStyles[size],
         className
       )}
