@@ -5,6 +5,7 @@ import Link from "next/link";
 import { LayoutDashboard, Settings, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
+import { LogoMark } from "@/components/ui";
 
 interface NavItem {
   label: string;
@@ -19,7 +20,7 @@ const navItems: NavItem[] = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
   const isActive = (href: string) => {
     if (href === "/dashboard") {
@@ -29,19 +30,17 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-64 bg-white border-r-4 border-black hidden md:flex flex-col shadow-[4px_0px_0px_0px_rgba(0,0,0,1)] z-10">
+    <aside className="w-64 bg-[#1a1a1a] hidden md:flex flex-col z-10">
       {/* Logo */}
-      <div className="p-6 border-b-4 border-black">
-        <Link href="/dashboard">
-          <h1 className="text-2xl font-black uppercase leading-tight">
-            Data<br />
-            <span className="text-[#FF6B00]">Strategy</span>
-          </h1>
+      <div className="p-6 border-b border-[#334155]">
+        <Link href="/dashboard" className="flex items-center gap-3">
+          <LogoMark size={32} color="#ff6600" />
+          <span className="text-white font-bold text-lg tracking-tight">PYMES-AI</span>
         </Link>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 p-4 space-y-1">
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.href);
@@ -51,27 +50,37 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "w-full flex items-center gap-3 font-bold px-4 py-3 border-2 transition-all",
-                active &&
-                  "bg-[#FF6B00] text-white border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -translate-y-1",
-                !active &&
-                  "border-transparent hover:border-black"
+                "w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-150",
+                active
+                  ? "bg-[#ff6600] text-white"
+                  : "text-[#94a3b8] hover:bg-[#2d2d2d] hover:text-white"
               )}
             >
-              <Icon className="w-5 h-5" />
+              <Icon className="w-5 h-5 shrink-0" />
               {item.label}
             </Link>
           );
         })}
       </nav>
 
-      {/* Cerrar Sesión */}
-      <div className="p-4 border-t-4 border-black">
+      {/* User + Cerrar Sesión */}
+      <div className="border-t border-[#334155] p-3">
+        {user && (
+          <div className="flex items-center gap-2 px-2 py-2 mb-2 overflow-hidden">
+            <div className="w-8 h-8 rounded-full bg-[#ff6600] text-white font-bold text-sm flex items-center justify-center shrink-0">
+              {user.name?.charAt(0).toUpperCase() ?? "U"}
+            </div>
+            <div className="overflow-hidden">
+              <p className="text-[13px] font-semibold text-white truncate">{user.name}</p>
+              <p className="text-[11px] text-[#94a3b8] truncate">{user.email}</p>
+            </div>
+          </div>
+        )}
         <button
           onClick={logout}
-          className="w-full flex items-center gap-3 font-bold px-4 py-3 border-2 border-black bg-white hover:bg-red-50 text-red-600 transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1"
+          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-[#94a3b8] hover:bg-[#ef444420] hover:text-[#f87171] transition-all duration-150"
         >
-          <LogOut className="w-5 h-5" />
+          <LogOut className="w-4 h-4 shrink-0" />
           Cerrar Sesión
         </button>
       </div>

@@ -2,6 +2,7 @@
 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { useStats } from '@/hooks/useStats'
+import { cn } from '@/lib/utils'
 
 function MetricCard({
   label,
@@ -14,14 +15,15 @@ function MetricCard({
 }) {
   return (
     <div
-      className={`border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 ${
-        accent ? 'bg-[#0033A0] text-white' : 'bg-white'
-      }`}
+      className={cn(
+        "bg-white rounded-[10px] p-5",
+        "shadow-[0_1px_3px_rgba(0,0,0,.08)]",
+        "border-l-4",
+        accent ? "border-[#ff6600]" : "border-[#059669]"
+      )}
     >
-      <p className={`text-xs font-bold uppercase tracking-wider ${accent ? 'text-blue-200' : 'text-gray-500'}`}>
-        {label}
-      </p>
-      <p className="text-3xl font-black mt-1">{value}</p>
+      <p className="text-xs font-medium text-[#64748b] uppercase tracking-wide mb-1">{label}</p>
+      <p className="text-2xl font-bold text-[#1e293b]">{value}</p>
     </div>
   )
 }
@@ -33,7 +35,7 @@ function MetricsSkeleton() {
         {Array.from({ length: 6 }).map((_, i) => (
           <div
             key={i}
-            className="border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 bg-gray-100 animate-pulse h-24"
+            className="bg-white rounded-[10px] shadow-[0_1px_3px_rgba(0,0,0,.08)] p-5 animate-pulse h-24"
           />
         ))}
       </div>
@@ -56,7 +58,7 @@ export function MetricsBand() {
 
   if (isError || !data) {
     return (
-      <div className="border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 bg-white text-center text-red-600 font-medium">
+      <div className="bg-white rounded-[10px] shadow-[0_1px_3px_rgba(0,0,0,.08)] p-4 text-center text-red-600 font-medium">
         No se pudieron cargar las métricas.
       </div>
     )
@@ -70,14 +72,14 @@ export function MetricsBand() {
   return (
     <div className="space-y-4 mb-8">
       {/* Título sección */}
-      <h3 className="text-xl font-bold uppercase border-b-2 border-black pb-2">
+      <h3 className="text-base font-semibold text-[#1e293b]">
         Métricas del Sistema
       </h3>
 
       {/* Tarjetas */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <MetricCard label="Total Datasets" value={data.totalDatasets} accent />
-        <MetricCard label="Total Jobs" value={data.totalJobs} />
+        <MetricCard label="Total Jobs" value={data.totalJobs} accent />
         <MetricCard label="Jobs Completados" value={data.jobsCompleted} />
         <MetricCard label="Jobs Fallidos" value={data.jobsFailed} />
         <MetricCard label="Tiempo Promedio" value={formatTime(data.avgProcessingTimeMs)} />
@@ -85,17 +87,17 @@ export function MetricsBand() {
       </div>
 
       {/* Chart Jobs */}
-      <div className="bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4">
-        <p className="text-sm font-bold uppercase mb-3">Jobs ETL — Completados vs Fallidos</p>
+      <div className="bg-white rounded-[10px] shadow-[0_1px_3px_rgba(0,0,0,.08)] p-4">
+        <p className="text-sm font-semibold text-[#1e293b] mb-3">Jobs ETL — Completados vs Fallidos</p>
         <ResponsiveContainer width="100%" height={120}>
           <BarChart data={chartData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-            <XAxis dataKey="name" tick={{ fontSize: 12, fontWeight: 'bold' }} />
+            <XAxis dataKey="name" tick={{ fontSize: 12 }} />
             <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
             <Tooltip
-              formatter={(value: number) => [value, 'Jobs']}
-              contentStyle={{ border: '2px solid black', borderRadius: 0 }}
+              formatter={(value) => [value as number, 'Jobs']}
+              contentStyle={{ border: '1px solid #e2e8f0', borderRadius: '8px' }}
             />
-            <Bar dataKey="value" radius={0}>
+            <Bar dataKey="value" radius={4}>
               {chartData.map((entry, index) => (
                 <Cell key={index} fill={entry.color} />
               ))}

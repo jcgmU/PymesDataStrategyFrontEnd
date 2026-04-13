@@ -64,18 +64,18 @@ export function DatasetsTable() {
 
   if (datasets.length === 0) {
     return (
-      <div className="flex items-center justify-center py-12 border-2 border-black rounded-md bg-surface shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-        <p className="text-text-muted font-medium">No hay datasets cargados</p>
+      <div className="flex items-center justify-center py-12 rounded-[10px] bg-white shadow-[0_1px_3px_rgba(0,0,0,.08)]">
+        <p className="text-[#64748b] font-medium">No hay datasets cargados</p>
       </div>
     );
   }
 
   return (
     <>
-    <div className="overflow-x-auto border-2 border-black rounded-md shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+    <div className="overflow-x-auto rounded-[10px] shadow-[0_1px_3px_rgba(0,0,0,.08)] border border-[#e2e8f0]">
       <table className="w-full">
         <thead>
-          <tr className="bg-surface border-b-2 border-black">
+          <tr className="bg-white border-b border-[#e2e8f0]">
             <th className="px-4 py-3 text-left font-bold text-text">Nombre</th>
             <th className="px-4 py-3 text-left font-bold text-text">Tamaño</th>
             <th className="px-4 py-3 text-left font-bold text-text">Estado</th>
@@ -92,7 +92,7 @@ export function DatasetsTable() {
                 key={dataset.id}
                 className={cn(
                   "bg-background hover:bg-surface-hover transition-colors",
-                  !isLast && "border-b-2 border-black"
+                  !isLast && "border-b border-[#e2e8f0]"
                 )}
               >
                 <td className="px-4 py-3">

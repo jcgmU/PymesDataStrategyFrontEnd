@@ -35,10 +35,9 @@ export function FilterBar() {
           onChange={(e) => setFilter({ search: e.target.value })}
           className={cn(
             "w-full pl-10 pr-4 py-2",
-            "bg-surface text-text placeholder:text-text-muted",
-            "border-2 border-black rounded-md",
-            "shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]",
-            "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1",
+            "bg-white text-[#1e293b] placeholder:text-[#64748b]",
+            "border border-[#e2e8f0] rounded-lg",
+            "focus:outline-none focus:border-[#ff6600] focus:ring-[3px] focus:ring-[rgba(255,102,0,.12)]",
             "transition-shadow duration-150"
           )}
         />
@@ -52,15 +51,14 @@ export function FilterBar() {
         }
         className={cn(
           "px-4 py-2 min-w-[180px]",
-          "bg-surface text-text",
-          "border-2 border-black rounded-md",
-          "shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]",
-          "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1",
+          "bg-white text-[#1e293b]",
+          "border border-[#e2e8f0] rounded-lg",
+          "focus:outline-none focus:border-[#ff6600] focus:ring-[3px] focus:ring-[rgba(255,102,0,.12)]",
           "cursor-pointer appearance-none",
           "transition-shadow duration-150"
         )}
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+          backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
           backgroundPosition: "right 0.5rem center",
           backgroundRepeat: "no-repeat",
           backgroundSize: "1.5em 1.5em",

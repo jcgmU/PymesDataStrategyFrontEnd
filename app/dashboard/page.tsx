@@ -39,16 +39,14 @@ export default function DashboardPage() {
   return (
     <div className="flex-1 p-8 overflow-auto">
       {/* Header */}
-      <div className="flex justify-between items-end mb-8 border-b-4 border-black pb-4">
+      <div className="flex justify-between items-end mb-8 pb-4 border-b border-[#e2e8f0]">
         <div>
-          <h2 className="text-4xl font-black uppercase">Panel de Control</h2>
-          <p className="text-lg font-medium text-gray-600 mt-1">
+          <h2 className="text-[22px] font-bold text-[#1e293b]">Panel de Control</h2>
+          <p className="text-sm text-[#64748b] mt-1">
             Sube tus archivos Excel para análisis estructurado.
           </p>
         </div>
-        <div className="bg-white border-2 border-black px-4 py-2 font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-          Administrador
-        </div>
+        <span className="text-sm text-[#64748b] font-medium">Administrador</span>
       </div>
 
       {/* Métricas del sistema */}
@@ -63,19 +61,19 @@ export default function DashboardPage() {
 
         {/* Col 2-3 — Dataset Table */}
         <div className="lg:col-span-2 space-y-4">
-          <h3 className="text-2xl font-bold uppercase flex items-center gap-2">
-            <FileSpreadsheet className="w-6 h-6" /> Archivos Recientes
+          <h3 className="text-lg font-semibold text-[#1e293b] flex items-center gap-2">
+            <FileSpreadsheet className="w-5 h-5 text-[#64748b]" /> Archivos Recientes
           </h3>
 
           {isLoading && (
-            <div className="bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-8 text-center">
-              <div className="animate-spin h-6 w-6 border-4 border-[#0033A0] border-t-transparent rounded-full mx-auto mb-2" />
-              <p className="font-medium text-gray-600">Cargando datasets...</p>
+            <div className="bg-white rounded-[10px] shadow-[0_1px_3px_rgba(0,0,0,.08)] p-8 text-center">
+              <div className="animate-spin h-6 w-6 border-4 border-[#ff6600] border-t-transparent rounded-full mx-auto mb-2" />
+              <p className="font-medium text-[#64748b]">Cargando datasets...</p>
             </div>
           )}
 
           {isError && (
-            <div className="bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-8 text-center">
+            <div className="bg-white rounded-[10px] shadow-[0_1px_3px_rgba(0,0,0,.08)] p-8 text-center">
               <p className="font-medium text-red-600">
                 Error al cargar los datasets. Intenta de nuevo.
               </p>

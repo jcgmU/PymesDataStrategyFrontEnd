@@ -37,13 +37,12 @@ export function FileDropzone() {
   const uploadMutation = useUploadDataset();
   const { jobStatus, isCompleted, isFailed, error: jobError } = useJobPoller(jobId);
 
-  // Cuando el job se completa o falla, invalida para refrescar la tabla y las métricas
   useEffect(() => {
     if (isCompleted || isFailed) {
       queryClient.invalidateQueries({ queryKey: ["datasets"] });
       queryClient.invalidateQueries({ queryKey: ["stats"] });
     }
-    
+
     if (isCompleted) {
       toast.success("¡ETL completado! El dataset está listo.");
       const timer = setTimeout(() => {
@@ -81,7 +80,6 @@ export function FileDropzone() {
     setJobId(null);
     setUploading(true, 0);
 
-    // Simulate progress while uploading
     let progress = 0;
     const progressInterval = setInterval(() => {
       progress = Math.min(progress + 10, 90);
@@ -95,7 +93,6 @@ export function FileDropzone() {
         toast.success("Archivo subido correctamente. Procesando...");
         setTimeout(() => {
           setUploading(false, 0);
-          // Guardar jobId para iniciar polling
           if (response?.data?.jobId) {
             setJobId(response.data.jobId);
           }
@@ -144,7 +141,6 @@ export function FileDropzone() {
     if (file) {
       handleFile(file);
     }
-    // Reset input to allow re-selecting same file
     e.target.value = "";
   };
 
@@ -153,7 +149,6 @@ export function FileDropzone() {
     setError(null);
   };
 
-  // Estado: processing (job en curso)
   const isProcessing = jobId !== null && !isCompleted && !isFailed;
 
   return (
@@ -163,12 +158,11 @@ export function FileDropzone() {
       onDrop={handleDrop}
       onClick={handleClick}
       className={cn(
-        "bg-white border-4 border-dashed border-black transition-colors",
+        "bg-white rounded-[10px] border-2 border-dashed border-[#e2e8f0]",
         "flex flex-col items-center justify-center p-12 text-center",
-        "h-full min-h-[300px]",
-        "shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
-        isDragging && "border-solid bg-orange-100",
-        !isDragging && !isUploading && jobId === null && "hover:bg-orange-50 cursor-pointer",
+        "h-full min-h-[300px] transition-colors",
+        isDragging && "border-[#ff6600] bg-[#fff0e6]",
+        !isDragging && !isUploading && jobId === null && "hover:border-[#ff6600] hover:bg-[#fff0e6] cursor-pointer",
         (isUploading || isProcessing) && "cursor-not-allowed opacity-75",
         (isCompleted || isFailed) && "cursor-default"
       )}
@@ -185,10 +179,10 @@ export function FileDropzone() {
       {/* Estado: Subiendo */}
       {isUploading && (
         <div className="flex flex-col items-center gap-4 w-full max-w-xs">
-          <div className="bg-[#0033A0] p-4 rounded-full border-2 border-black mb-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+          <div className="bg-[#ff6600] p-4 rounded-full mb-4">
             <UploadCloud className="w-10 h-10 text-white animate-pulse" />
           </div>
-          <p className="text-xl font-bold">Subiendo archivo...</p>
+          <p className="text-xl font-bold text-[#1e293b]">Subiendo archivo...</p>
           <ProgressBar value={uploadProgress} size="md" showLabel />
         </div>
       )}
@@ -196,36 +190,36 @@ export function FileDropzone() {
       {/* Estado: Procesando */}
       {!isUploading && isProcessing && (
         <div className="flex flex-col items-center gap-4 w-full max-w-xs">
-          <div className="bg-[#0033A0] p-4 rounded-full border-2 border-black mb-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+          <div className="bg-[#ff6600] p-4 rounded-full mb-4">
             <Loader2 className="w-10 h-10 text-white animate-spin" />
           </div>
-          <p className="text-xl font-bold">Procesando dataset...</p>
+          <p className="text-xl font-bold text-[#1e293b]">Procesando dataset...</p>
           {jobStatus && (
-            <span className="font-mono text-sm bg-gray-100 border-2 border-black px-3 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+            <span className="font-mono text-sm bg-[#f1f5f9] border border-[#e2e8f0] rounded-lg px-3 py-1 text-[#64748b]">
               {jobStatus}
             </span>
           )}
-          <p className="text-sm text-gray-500 font-medium">Job: {jobId}</p>
+          <p className="text-sm text-[#64748b] font-medium">Job: {jobId}</p>
         </div>
       )}
 
       {/* Estado: Completado */}
       {!isUploading && isCompleted && (
         <div className="flex flex-col items-center gap-4 w-full max-w-xs">
-          <div className="bg-green-500 p-4 rounded-full border-2 border-black mb-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+          <div className="bg-[#059669] p-4 rounded-full mb-4">
             <CheckCircle className="w-10 h-10 text-white" />
           </div>
-          <p className="text-xl font-bold text-green-700">¡Dataset listo!</p>
+          <p className="text-xl font-bold text-[#059669]">¡Dataset listo!</p>
         </div>
       )}
 
       {/* Estado: Fallido */}
       {!isUploading && isFailed && (
         <div className="flex flex-col items-center gap-4 w-full max-w-xs">
-          <div className="bg-red-500 p-4 rounded-full border-2 border-black mb-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+          <div className="bg-[#dc2626] p-4 rounded-full mb-4">
             <XCircle className="w-10 h-10 text-white" />
           </div>
-          <p className="text-xl font-bold text-red-700">Error al procesar</p>
+          <p className="text-xl font-bold text-[#dc2626]">Error al procesar</p>
           {jobError && (
             <p className="text-sm text-red-600 font-medium">{jobError}</p>
           )}
@@ -235,7 +229,7 @@ export function FileDropzone() {
               e.stopPropagation();
               handleRetry();
             }}
-            className="font-bold py-3 px-6 border-2 border-black bg-[#FF6B00] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all duration-150 w-full"
+            className="w-full font-semibold py-3 px-6 rounded-lg bg-[#ff6600] text-white hover:bg-[#cc5200] hover:shadow-[0_4px_12px_rgba(255,102,0,.3)] active:scale-[0.98] transition-all duration-150"
           >
             Reintentar
           </button>
@@ -245,16 +239,16 @@ export function FileDropzone() {
       {/* Estado: Idle */}
       {!isUploading && !isProcessing && !isCompleted && !isFailed && (
         <>
-          <div className="bg-[#0033A0] p-4 rounded-full border-2 border-black mb-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+          <div className="bg-[#ff6600] p-4 rounded-full mb-4">
             <UploadCloud className="w-10 h-10 text-white" />
           </div>
-          <h3 className="text-xl font-bold mb-2">Arrastra tu Excel aquí</h3>
-          <p className="font-medium text-gray-600 mb-6">
+          <h3 className="text-lg font-bold text-[#1e293b] mb-2">Arrastra tu Excel aquí</h3>
+          <p className="font-medium text-[#64748b] mb-6">
             Máximo 50,000 registros (.xlsx)
           </p>
           <button
             type="button"
-            className="font-bold py-3 px-6 border-2 border-black bg-[#FF6B00] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all duration-150 w-full"
+            className="font-semibold py-3 px-6 rounded-lg bg-[#ff6600] text-white hover:bg-[#cc5200] hover:shadow-[0_4px_12px_rgba(255,102,0,.3)] active:scale-[0.98] transition-all duration-150 w-full"
           >
             Seleccionar Archivo
           </button>
