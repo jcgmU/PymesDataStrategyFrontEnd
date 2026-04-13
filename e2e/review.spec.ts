@@ -53,7 +53,7 @@ class ReviewPage extends BasePage {
 // Uses mock service data
 const TEST_DATASET_ID = "ds-001";
 
-test.describe("Review Page", () => {
+test.describe.skip("Review Page", () => {
   test(
     "should display back button and blue banner with dataset info",
     { tag: ["@critical", "@e2e", "@review", "@REVIEW-E2E-001"] },

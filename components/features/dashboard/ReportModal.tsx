@@ -74,7 +74,7 @@ export function ReportModal({ datasetId, datasetName, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-start justify-center p-4 pt-8 overflow-y-auto">
-      <div className="bg-white border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] w-full max-w-2xl flex flex-col my-auto">
+      <div className="bg-white border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] w-full max-w-2xl flex flex-col my-auto max-h-[90vh]">
         {/* Header — fijo en la parte superior del modal */}
         <div className="bg-[#0033A0] text-white p-4 flex justify-between items-center border-b-2 border-black flex-shrink-0 sticky top-0 z-10">
           <h2 className="text-xl font-black uppercase">
@@ -88,7 +88,7 @@ export function ReportModal({ datasetId, datasetName, onClose }: Props) {
           </button>
         </div>
 
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto flex-1 min-h-0">
           {loading && (
             <div className="space-y-4">
               {[1, 2, 3, 4].map((i) => (
