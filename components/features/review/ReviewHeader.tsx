@@ -3,9 +3,9 @@
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
-import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { useReviewStore } from "@/store";
+import { cn } from "@/lib/utils";
 import type { Dataset } from "@/types";
 
 interface ReviewHeaderProps {
@@ -26,48 +26,67 @@ export function ReviewHeader({ dataset, onSubmit }: ReviewHeaderProps) {
   const progress = getProgress();
   const allResolved = progress.resolved === progress.total && progress.total > 0;
 
-  const handleBack = () => {
-    router.push("/dashboard");
-  };
-
   return (
-    <header className="bg-white border-b border-[#e2e8f0] p-4 shadow-[0_1px_3px_rgba(0,0,0,.06)]">
+    <header className="bg-white border-b border-[#ede8e1] px-6 py-4">
       <div className="flex items-center justify-between gap-4">
-        {/* Left side: Back button and dataset name */}
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleBack}
-            className="flex items-center gap-2"
+
+        {/* Left: back + dataset name */}
+        <div className="flex items-center gap-4 min-w-0">
+          <button
+            onClick={() => router.push("/dashboard")}
+            className={cn(
+              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium",
+              "text-[#6b6258] bg-[#f7f5f2] hover:bg-[#ede8e1] hover:text-[#1a1612]",
+              "transition-[background-color,color] duration-150 ease-out active:scale-[0.97]"
+            )}
+            style={{ fontFamily: "var(--font-sans)" }}
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.5} />
             Volver
-          </Button>
-          <h1 className="text-xl font-bold text-text">{dataset.name}</h1>
+          </button>
+          <h1
+            className="text-[#1a1612] font-semibold text-sm truncate"
+            style={{ fontFamily: "var(--font-sans)" }}
+          >
+            {dataset.name}
+          </h1>
         </div>
 
-        {/* Right side: Progress and submit button */}
-        <div className="flex items-center gap-6">
-          {/* Progress indicator */}
+        {/* Right: progress + submit */}
+        <div className="flex items-center gap-6 shrink-0">
           <div className="flex flex-col items-end gap-1">
-            <span className="text-sm font-medium text-text-muted">
+            <span
+              className="text-xs font-medium text-[#6b6258]"
+              style={{ fontFamily: "var(--font-sans)" }}
+            >
               {progress.resolved} de {progress.total} anomalías resueltas
             </span>
-            <div className="w-48">
+            <div className="w-40">
               <ProgressBar value={progress.percentage} size="sm" />
             </div>
           </div>
 
-          {/* Submit button */}
-          <Button
-            variant="primary"
+          <button
             onClick={onSubmit}
-            disabled={!allResolved}
-            loading={isSubmitting}
+            disabled={!allResolved || isSubmitting}
+            className={cn(
+              "inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold",
+              "transition-[background-color,opacity,transform] duration-150 ease-out active:scale-[0.97]",
+              allResolved && !isSubmitting
+                ? "bg-[#ff6600] text-white hover:bg-[#e55a00]"
+                : "bg-[#f7f5f2] text-[#9c9189] cursor-not-allowed"
+            )}
+            style={{ fontFamily: "var(--font-sans)" }}
           >
-            Finalizar revisión
-          </Button>
+            {isSubmitting ? (
+              <>
+                <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Enviando...
+              </>
+            ) : (
+              "Finalizar revisión"
+            )}
+          </button>
         </div>
       </div>
     </header>

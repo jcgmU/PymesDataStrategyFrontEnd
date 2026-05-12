@@ -1,21 +1,53 @@
 import Link from "next/link";
-import { Zap } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { FadeUp } from "@/components/ui";
 
 export function FinalCTA() {
   return (
-    <section className="bg-[#ff6600] py-32 px-6 text-center">
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-5xl md:text-7xl font-extrabold text-white leading-tight mb-8">
-          Deja de limpiar manualmente.<br />Empieza a decidir.
-        </h2>
+    <section className="py-32 px-6 bg-[#ff6600] overflow-hidden relative">
 
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center gap-3 bg-white text-[#1e293b] font-bold text-xl px-8 py-4 rounded-xl shadow-[0_4px_6px_rgba(0,0,0,.12)] hover:shadow-[0_10px_30px_rgba(0,0,0,.15)] hover:scale-105 active:scale-[0.98] transition-all duration-150"
-        >
-          Probar el MVP
-          <Zap className="text-[#ff6600]" size={24} strokeWidth={2.5} />
-        </Link>
+      {/* Textura sutil */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage: "repeating-linear-gradient(0deg, #000 0px, #000 1px, transparent 1px, transparent 40px), repeating-linear-gradient(90deg, #000 0px, #000 1px, transparent 1px, transparent 40px)",
+        }}
+        aria-hidden
+      />
+
+      <div className="relative max-w-5xl mx-auto text-center">
+
+        <FadeUp>
+          <h2
+            className="text-white leading-[0.9] mb-10"
+            style={{ fontFamily: "var(--font-display)", fontSize: "clamp(3rem, 10vw, 8rem)", fontWeight: 700 }}
+          >
+            Deja de limpiar
+            <br />
+            manualmente.
+            <br />
+            <span className="opacity-60">Empieza a decidir.</span>
+          </h2>
+        </FadeUp>
+
+        <FadeUp delay={120}>
+          <Link
+            href="/dashboard"
+            className="group inline-flex items-center gap-3 bg-white text-[#1a1612] font-bold text-lg px-8 py-4 rounded-xl
+              transition-[background-color,box-shadow,transform] duration-150 ease-out
+              hover:bg-[#1a1612] hover:text-white hover:shadow-[0_16px_48px_rgba(0,0,0,.3)]
+              active:scale-[0.97]"
+            style={{ fontFamily: "var(--font-sans)" }}
+          >
+            Probar el MVP
+            <ArrowRight
+              size={18}
+              strokeWidth={2.5}
+              className="transition-transform duration-150 ease-out group-hover:translate-x-1"
+            />
+          </Link>
+        </FadeUp>
+
       </div>
     </section>
   );

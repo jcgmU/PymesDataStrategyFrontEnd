@@ -1,14 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { Plus } from "lucide-react";
+import { FadeUp } from "@/components/ui";
 
-interface FAQItem {
-  question: string;
-  answer: string;
-}
-
-const faqItems: FAQItem[] = [
+const faqItems = [
   {
     question: "¿Qué pasa si mi Excel tiene columnas desordenadas?",
     answer:
@@ -17,7 +13,7 @@ const faqItems: FAQItem[] = [
   {
     question: "¿Necesito saber programar para usar las reglas de IA?",
     answer:
-      "No. La interfaz está diseñada para usuarios de negocio sin conocimientos técnicos. La IA genera sugerencias en lenguaje natural y tú simplemente apruebas o rechazas cada acción con un clic. Todo el proceso es visual e intuitivo.",
+      "No. La interfaz está diseñada para usuarios de negocio sin conocimientos técnicos. La IA genera sugerencias en lenguaje natural y tú simplemente apruebas o rechazas cada acción con un clic.",
   },
   {
     question: "¿Cómo se garantiza que no pierdo mi información original?",
@@ -29,59 +25,66 @@ const faqItems: FAQItem[] = [
 export function FAQAccordion() {
   const [openIndex, setOpenIndex] = useState<number>(0);
 
-  const handleToggle = (index: number) => {
-    setOpenIndex(openIndex === index ? -1 : index);
-  };
-
   return (
-    <section id="faq" className="py-24 px-6 bg-[#f1f5f9]">
-      <div className="max-w-3xl mx-auto">
-        <h2 className="text-4xl md:text-5xl font-extrabold text-center mb-12 text-[#1e293b]">
-          Preguntas Frecuentes
-        </h2>
+    <section id="faq" className="py-24 px-6 bg-[#1a1612]">
+      <div className="max-w-4xl mx-auto">
 
-        <div className="space-y-3">
+        <FadeUp>
+          <h2
+            className="text-white text-center mb-16 leading-tight"
+            style={{ fontFamily: "var(--font-display)", fontSize: "clamp(2rem, 5vw, 3.5rem)", fontWeight: 700 }}
+          >
+            Preguntas Frecuentes
+          </h2>
+        </FadeUp>
+
+        <div>
           {faqItems.map((item, index) => {
             const isOpen = openIndex === index;
             return (
-              <div
-                key={index}
-                className="bg-white rounded-[10px] shadow-[0_1px_3px_rgba(0,0,0,.08)] overflow-hidden"
-              >
-                <button
-                  onClick={() => handleToggle(index)}
-                  className="w-full flex items-center justify-between p-6 text-left"
-                  aria-expanded={isOpen}
-                >
-                  <span className="text-base font-semibold text-[#1e293b] pr-4">
-                    {item.question}
-                  </span>
-                  <ChevronDown
-                    className={`text-[#ff6600] shrink-0 transition-transform duration-300 ease-in-out ${
-                      isOpen ? "rotate-180" : "rotate-0"
-                    }`}
-                    size={20}
-                    strokeWidth={2.5}
-                  />
-                </button>
+              <FadeUp key={index} delay={index * 60}>
+                <div className="border-t border-[#2e2924] last:border-b">
+                  <button
+                    onClick={() => setOpenIndex(isOpen ? -1 : index)}
+                    className="w-full flex items-start justify-between gap-6 py-7 text-left group"
+                    aria-expanded={isOpen}
+                  >
+                    <span
+                      className="text-base font-semibold text-white group-hover:text-[#ff6600] transition-colors duration-150 ease-out"
+                      style={{ fontFamily: "var(--font-sans)" }}
+                    >
+                      {item.question}
+                    </span>
+                    <div className="w-6 h-6 rounded-full border border-[#3a3530] flex items-center justify-center shrink-0 mt-0.5 transition-[border-color,background-color] duration-150 ease-out group-hover:border-[#ff6600]">
+                      <Plus
+                        size={14}
+                        strokeWidth={2.5}
+                        className="text-[#6b6258] group-hover:text-[#ff6600] transition-[transform,color] duration-200 ease-out"
+                        style={{ transform: isOpen ? "rotate(45deg)" : "rotate(0deg)" }}
+                      />
+                    </div>
+                  </button>
 
-                <div
-                  className={`grid transition-all duration-300 ease-in-out ${
-                    isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-                  }`}
-                >
-                  <div className="overflow-hidden">
-                    <div className="px-6 pb-6 border-t border-[#e2e8f0]">
-                      <p className="text-[#64748b] font-medium leading-relaxed pt-4">
+                  <div
+                    className={`grid transition-[grid-template-rows] duration-200 ease-out ${
+                      isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      <p
+                        className="text-[#9c9189] leading-relaxed pb-7"
+                        style={{ fontFamily: "var(--font-sans)" }}
+                      >
                         {item.answer}
                       </p>
                     </div>
                   </div>
                 </div>
-              </div>
+              </FadeUp>
             );
           })}
         </div>
+
       </div>
     </section>
   );

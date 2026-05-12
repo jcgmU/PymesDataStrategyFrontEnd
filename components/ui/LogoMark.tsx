@@ -23,7 +23,7 @@ export function LogoMark({ size = 32, color = "#ff6600" }: LogoMarkProps) {
       aria-label="Logo PYMES-AI"
     >
       {dots.map((d, i) => (
-        <circle key={i} cx={d.x + r} cy={d.y + r} r={r} fill={color} />
+        <circle key={i} cx={d.x + r} cy={d.y + r} r={r} style={{ fill: color }} />
       ))}
     </svg>
   );

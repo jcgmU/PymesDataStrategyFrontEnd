@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import { useQueryClient } from '@tanstack/react-query'
@@ -35,7 +36,9 @@ export function useJobSSE(jobId: string | null): UseJobSSEResult {
   const queryClient = useQueryClient()
   // Keep a stable ref to avoid stale closures in EventSource handlers
   const jobIdRef = useRef(jobId)
-  jobIdRef.current = jobId
+  useEffect(() => {
+    jobIdRef.current = jobId
+  }, [jobId])
 
   useEffect(() => {
     if (!jobId || !token) {

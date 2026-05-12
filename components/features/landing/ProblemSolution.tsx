@@ -1,65 +1,105 @@
 import { X, Check } from "lucide-react";
+import { FadeUp } from "@/components/ui";
 
 const problems = [
   "Horas perdidas ordenando Excels manualmente",
   "Errores humanos que arruinan reportes clave",
-  "Sin trazabilidad: no sabes quién cambió qué ni cuándo",
+  "Sin trazabilidad: no sabes quién cambió qué",
   "Imposible escalar: más datos = más caos",
 ];
 
 const solutions = [
   "IA procesa hasta 50.000 registros en minutos",
   "Estandarización automática con reglas configurables",
-  "Registro inmutable de cada transformación para auditoría",
+  "Registro inmutable de cada transformación",
   "Escala con tu negocio sin añadir personal",
 ];
 
 export function ProblemSolution() {
   return (
-    <section className="py-24 px-6 max-w-6xl mx-auto w-full">
-      <h2 className="text-4xl md:text-5xl font-extrabold text-center mb-16 text-[#1e293b]">
-        La realidad de la gestión de datos
-      </h2>
+    <section className="py-24 px-6 bg-[#f7f5f2]">
+      <div className="max-w-6xl mx-auto">
 
-      <div className="grid md:grid-cols-2 gap-8">
-        {/* Problema */}
-        <div className="bg-[#fee2e2] rounded-[10px] p-6 shadow-[0_1px_3px_rgba(0,0,0,.08)]">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-[#dc2626] rounded-lg flex items-center justify-center">
-              <X className="w-6 h-6 text-white" />
-            </div>
-            <h3 className="text-2xl font-bold text-[#dc2626]">
-              El Problema
-            </h3>
-          </div>
-          <ul className="space-y-4">
-            {problems.map((item, idx) => (
-              <li key={idx} className="flex items-start gap-3">
-                <X className="w-5 h-5 text-[#dc2626] mt-0.5 shrink-0" />
-                <span className="font-medium text-[#1e293b]">{item}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <FadeUp>
+          <h2
+            className="text-[#1a1612] text-center mb-16 leading-tight"
+            style={{ fontFamily: "var(--font-display)", fontSize: "clamp(2rem, 5vw, 3.5rem)", fontWeight: 700 }}
+          >
+            La realidad de la gestión de datos
+          </h2>
+        </FadeUp>
 
-        {/* Solución */}
-        <div className="bg-[#d1fae5] rounded-[10px] p-6 shadow-[0_1px_3px_rgba(0,0,0,.08)]">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-[#059669] rounded-lg flex items-center justify-center">
-              <Check className="w-6 h-6 text-white" />
+        <div className="grid md:grid-cols-2 gap-6">
+
+          {/* Problema */}
+          <FadeUp delay={80}>
+            <div className="bg-[#1a1612] rounded-2xl p-8 h-full">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+                  <X size={16} className="text-white/60" strokeWidth={2.5} />
+                </div>
+                <span
+                  className="text-sm font-semibold text-white/40 tracking-widest uppercase"
+                  style={{ fontFamily: "var(--font-sans)" }}
+                >
+                  Sin nuestra solución
+                </span>
+              </div>
+              <ul className="space-y-5">
+                {problems.map((item, i) => (
+                  <li key={i} className="flex items-start gap-4">
+                    <span
+                      className="text-[#ff6600] font-bold text-xs mt-1 shrink-0 tabular-nums"
+                      style={{ fontFamily: "var(--font-sans)" }}
+                    >
+                      0{i + 1}
+                    </span>
+                    <span
+                      className="text-white/60 font-medium leading-snug"
+                      style={{ fontFamily: "var(--font-sans)" }}
+                    >
+                      {item}
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <h3 className="text-2xl font-bold text-[#059669]">
-              Nuestra Solución
-            </h3>
-          </div>
-          <ul className="space-y-4">
-            {solutions.map((item, idx) => (
-              <li key={idx} className="flex items-start gap-3">
-                <Check className="w-5 h-5 text-[#059669] mt-0.5 shrink-0" />
-                <span className="font-medium text-[#1e293b]">{item}</span>
-              </li>
-            ))}
-          </ul>
+          </FadeUp>
+
+          {/* Solución */}
+          <FadeUp delay={160}>
+            <div className="bg-[#ff6600] rounded-2xl p-8 h-full">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
+                  <Check size={16} className="text-white" strokeWidth={2.5} />
+                </div>
+                <span
+                  className="text-sm font-semibold text-white/70 tracking-widest uppercase"
+                  style={{ fontFamily: "var(--font-sans)" }}
+                >
+                  Con PYMES-AI
+                </span>
+              </div>
+              <ul className="space-y-5">
+                {solutions.map((item, i) => (
+                  <li key={i} className="flex items-start gap-4">
+                    <span
+                      className="text-[#1a1612] font-bold text-xs mt-1 shrink-0 tabular-nums"
+                      style={{ fontFamily: "var(--font-sans)" }}
+                    >
+                      0{i + 1}
+                    </span>
+                    <span
+                      className="text-white font-semibold leading-snug"
+                      style={{ fontFamily: "var(--font-sans)" }}
+                    >
+                      {item}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </FadeUp>
         </div>
       </div>
     </section>

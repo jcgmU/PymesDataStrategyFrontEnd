@@ -1,22 +1,23 @@
 import { UploadCloud, Cpu, CheckCircle2 } from "lucide-react";
+import { FadeUp } from "@/components/ui";
 
 const steps = [
   {
-    number: 1,
+    number: "01",
     icon: UploadCloud,
     title: "Carga Segura",
     description:
       "Sube tu archivo Excel o CSV. Todos los datos viajan cifrados y se almacenan en un entorno seguro y aislado.",
   },
   {
-    number: 2,
+    number: "02",
     icon: Cpu,
     title: "Inferencia IA",
     description:
-      "Nuestro agente detecta tipos de datos, inconsistencias y errores, y aplica transformaciones inteligentes automáticamente.",
+      "El agente detecta tipos de datos, inconsistencias y errores, y aplica transformaciones inteligentes automáticamente.",
   },
   {
-    number: 3,
+    number: "03",
     icon: CheckCircle2,
     title: "Tú Apruebas",
     description:
@@ -26,42 +27,62 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section
-      id="como-funciona"
-      className="py-24 px-6 bg-white border-y border-[#e2e8f0]"
-    >
+    <section id="como-funciona" className="py-24 px-6 bg-white">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-4xl md:text-5xl font-extrabold text-center mb-16 text-[#1e293b]">
-          Cómo Funciona
-        </h2>
 
-        <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
-          {/* Horizontal connector — desktop only */}
-          <div
-            className="hidden md:block absolute top-7 left-[calc(16.67%+1.5rem)] right-[calc(16.67%+1.5rem)] h-px bg-[#e2e8f0]"
-            aria-hidden="true"
-          />
+        <FadeUp>
+          <div className="mb-20">
+            <p
+              className="text-[#ff6600] text-sm font-semibold tracking-widest uppercase mb-4"
+              style={{ fontFamily: "var(--font-sans)" }}
+            >
+              El proceso
+            </p>
+            <h2
+              className="text-[#1a1612] leading-tight max-w-xl"
+              style={{ fontFamily: "var(--font-display)", fontSize: "clamp(2rem, 5vw, 3.5rem)", fontWeight: 700 }}
+            >
+              Cómo Funciona
+            </h2>
+          </div>
+        </FadeUp>
 
-          {steps.map(({ number, icon: Icon, title, description }) => (
-            <div key={number} className="relative flex flex-col items-center h-full">
-              {/* Step number badge */}
-              <div className="relative z-10 w-14 h-14 rounded-full bg-[#ff6600] flex items-center justify-center mb-6 shrink-0">
-                <span className="text-white font-bold text-xl">{number}</span>
-              </div>
+        <div className="space-y-px">
+          {steps.map(({ number, icon: Icon, title, description }, i) => (
+            <FadeUp key={number} delay={i * 100}>
+              <div className="group grid grid-cols-[80px_1fr_auto] md:grid-cols-[120px_1fr_auto] items-center gap-6 md:gap-12 py-8 border-t border-[#ede8e1] last:border-b">
 
-              {/* Card */}
-              <div className="flex-1 w-full bg-white rounded-[10px] shadow-[0_1px_3px_rgba(0,0,0,.08),0_4px_16px_rgba(0,0,0,.04)] p-6 text-center">
-                <div className="flex justify-center mb-4">
-                  <Icon className="w-10 h-10 text-[#ff6600]" />
+                {/* Número */}
+                <span
+                  className="text-[#d4cfc8] group-hover:text-[#ff6600] transition-colors duration-200 ease-out"
+                  style={{ fontFamily: "var(--font-display)", fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 700 }}
+                >
+                  {number}
+                </span>
+
+                {/* Contenido */}
+                <div>
+                  <h3
+                    className="text-[#1a1612] mb-2"
+                    style={{ fontFamily: "var(--font-display)", fontSize: "clamp(1.25rem, 2.5vw, 1.75rem)", fontWeight: 700 }}
+                  >
+                    {title}
+                  </h3>
+                  <p
+                    className="text-[#6b6258] leading-relaxed max-w-xl"
+                    style={{ fontFamily: "var(--font-sans)" }}
+                  >
+                    {description}
+                  </p>
                 </div>
-                <h3 className="text-xl font-bold mb-3 text-[#1e293b]">
-                  {title}
-                </h3>
-                <p className="text-[#64748b] font-medium leading-relaxed">
-                  {description}
-                </p>
+
+                {/* Icono */}
+                <div className="w-12 h-12 rounded-xl bg-[#f7f5f2] group-hover:bg-[#fff0e6] flex items-center justify-center shrink-0 transition-colors duration-200 ease-out">
+                  <Icon size={22} className="text-[#6b6258] group-hover:text-[#ff6600] transition-colors duration-200 ease-out" strokeWidth={1.5} />
+                </div>
+
               </div>
-            </div>
+            </FadeUp>
           ))}
         </div>
       </div>

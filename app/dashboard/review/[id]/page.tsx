@@ -221,8 +221,10 @@ export default function ReviewPage() {
     return (
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin h-8 w-8 border-4 border-[#ff6600] border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-gray-500 font-bold">Cargando revisión...</p>
+          <div className="w-5 h-5 border-2 border-[#ff6600] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-sm font-medium text-[#6b6258]" style={{ fontFamily: "var(--font-sans)" }}>
+            Cargando revisión...
+          </p>
         </div>
       </div>
     );
@@ -231,14 +233,15 @@ export default function ReviewPage() {
   // Error state
   if (isDatasetError || !dataset) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="bg-white rounded-[10px] shadow-[0_1px_3px_rgba(0,0,0,.08)] p-8 text-center border border-[#e2e8f0]">
-          <p className="text-[#dc2626] font-semibold mb-4">
+      <div className="flex items-center justify-center flex-1">
+        <div className="bg-white rounded-xl p-8 text-center border border-[#ede8e1]">
+          <p className="text-red-600 font-semibold mb-4 text-sm" style={{ fontFamily: "var(--font-sans)" }}>
             Dataset no encontrado o error al cargarlo.
           </p>
           <button
             onClick={() => router.push("/dashboard")}
-            className="font-semibold py-2 px-6 rounded-lg bg-[#1e293b] text-white hover:bg-[#0f172a] active:scale-[0.98] transition-all duration-150"
+            className="font-semibold py-2 px-6 rounded-lg bg-[#1a1612] text-white hover:bg-[#ff6600] active:scale-[0.97] transition-[background-color,transform] duration-150 text-sm"
+            style={{ fontFamily: "var(--font-sans)" }}
           >
             Volver al Dashboard
           </button>
@@ -253,31 +256,37 @@ export default function ReviewPage() {
       <ReviewHeader dataset={dataset} onSubmit={handleSubmitETL} />
 
       <div className="flex-1 p-8 overflow-auto">
-        {/* Banner azul informativo */}
-        <div className="bg-[#1e293b] text-white rounded-[10px] p-6 mb-6 shadow-[0_4px_6px_rgba(0,0,0,.07)] flex flex-col md:flex-row justify-between items-center gap-4">
+        {/* Banner informativo */}
+        <div className="bg-[#1a1612] text-white rounded-xl p-6 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <div>
-            <h2 className="text-xl font-bold">
+            <h2
+              className="font-semibold text-base"
+              style={{ fontFamily: "var(--font-sans)" }}
+            >
               Revisión de IA: {dataset.name}
             </h2>
-            <p className="text-sm font-medium mt-1 text-white/75">
-              El Agente IA ha perfilado los datos y sugiere las siguientes reglas
-              de limpieza.
+            <p className="text-sm mt-1 text-white/60" style={{ fontFamily: "var(--font-sans)" }}>
+              El Agente IA ha perfilado los datos y sugiere las siguientes reglas de limpieza.
             </p>
           </div>
-          <div className="bg-white text-[#1e293b] font-bold text-2xl px-6 py-3 rounded-[10px] text-center min-w-[80px]">
-            {pendingCount}
-            <div className="text-xs font-semibold text-[#64748b] mt-0.5">Pendientes</div>
+          <div className="bg-white/10 border border-white/10 text-white rounded-xl px-6 py-3 text-center min-w-[80px]">
+            <div className="text-2xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
+              {pendingCount}
+            </div>
+            <div className="text-[10px] font-semibold tracking-widest uppercase text-white/50 mt-0.5" style={{ fontFamily: "var(--font-sans)" }}>
+              Pendientes
+            </div>
           </div>
         </div>
 
         {/* Banner de restauración de progreso */}
         {showRestoreBanner && savedProgress && (
-          <div className="bg-[#fff0e6] border border-[#ff6600]/30 rounded-[10px] p-4 mb-6 flex items-center justify-between">
-            <p className="font-semibold text-[#c2410c] text-sm">
-              ↪ Tienes {restoredCount} decisión(es) guardada(s) del{" "}
+          <div className="bg-[#fff8f4] border border-[#ff6600]/20 rounded-xl p-4 mb-6 flex items-center justify-between gap-4">
+            <p className="font-medium text-[#c2410c] text-sm" style={{ fontFamily: "var(--font-sans)" }}>
+              Tienes {restoredCount} decisión(es) guardada(s) del{" "}
               {new Date(savedProgress.savedAt).toLocaleDateString("es-CO")}.
             </p>
-            <div className="flex gap-2">
+            <div className="flex gap-2 shrink-0">
               <button
                 onClick={() => {
                   useReviewStore.setState((state) => {
@@ -296,16 +305,15 @@ export default function ReviewPage() {
                   setShowRestoreBanner(false);
                   toast.success("Progreso restaurado correctamente.");
                 }}
-                className="font-semibold text-sm px-4 py-2 rounded-lg bg-[#ff6600] text-white hover:bg-[#cc5200] active:scale-[0.98] transition-all"
+                className="font-semibold text-sm px-4 py-2 rounded-lg bg-[#ff6600] text-white hover:bg-[#e55a00] active:scale-[0.97] transition-[background-color,transform] duration-150"
+                style={{ fontFamily: "var(--font-sans)" }}
               >
                 Retomar
               </button>
               <button
-                onClick={() => {
-                  clearProgress(datasetId);
-                  setShowRestoreBanner(false);
-                }}
-                className="font-semibold text-sm px-4 py-2 rounded-lg border border-[#e2e8f0] bg-white text-[#64748b] hover:bg-[#f8fafc] transition-colors"
+                onClick={() => { clearProgress(datasetId); setShowRestoreBanner(false); }}
+                className="font-semibold text-sm px-4 py-2 rounded-lg border border-[#ede8e1] bg-white text-[#6b6258] hover:bg-[#f7f5f2] transition-colors duration-150"
+                style={{ fontFamily: "var(--font-sans)" }}
               >
                 Descartar
               </button>
@@ -315,14 +323,14 @@ export default function ReviewPage() {
 
         {/* Grupos de anomalías */}
         {anomalies.length > 0 ? (
-          <div className="grid gap-6">
+          <div className="grid gap-4">
             {groupedAnomalies.map((group) => (
               <AnomalyGroupCard key={group.type} group={group} datasetId={datasetId} />
             ))}
           </div>
         ) : (
-          <div className="bg-white rounded-[10px] shadow-[0_1px_3px_rgba(0,0,0,.08)] border border-[#e2e8f0] p-8 text-center">
-            <p className="font-semibold text-lg text-[#1e293b]">
+          <div className="bg-white rounded-xl border border-[#ede8e1] p-10 text-center">
+            <p className="font-semibold text-[#1a1612] text-sm" style={{ fontFamily: "var(--font-sans)" }}>
               No se detectaron anomalías en este dataset.
             </p>
           </div>
@@ -330,8 +338,8 @@ export default function ReviewPage() {
 
         {/* Mensaje cuando todas resueltas */}
         {pendingCount === 0 && anomalies.length > 0 && (
-          <div className="mt-12 flex justify-center">
-            <p className="text-sm font-medium text-gray-600">
+          <div className="mt-10 flex justify-center">
+            <p className="text-sm font-medium text-[#6b6258]" style={{ fontFamily: "var(--font-sans)" }}>
               Usa el botón &ldquo;Finalizar revisión&rdquo; en la cabecera para enviar las decisiones.
             </p>
           </div>

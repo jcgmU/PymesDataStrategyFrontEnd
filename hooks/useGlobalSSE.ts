@@ -32,7 +32,9 @@ export function useGlobalSSE(): void {
   const queryClient = useQueryClient()
   // Stable ref so event handlers never go stale across re-renders
   const tokenRef = useRef(token)
-  tokenRef.current = token
+  useEffect(() => {
+    tokenRef.current = token
+  }, [token])
 
   useEffect(() => {
     if (!token) return

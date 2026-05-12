@@ -17,7 +17,7 @@ const ACCEPTED_TYPES = [
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 ];
 const ACCEPTED_EXTENSIONS = [".csv", ".xlsx", ".xls"];
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 export function FileDropzone() {
   const [isDragging, setIsDragging] = useState(false);
@@ -42,39 +42,24 @@ export function FileDropzone() {
       queryClient.invalidateQueries({ queryKey: ["datasets"] });
       queryClient.invalidateQueries({ queryKey: ["stats"] });
     }
-
     if (isCompleted) {
       toast.success("¡ETL completado! El dataset está listo.");
-      const timer = setTimeout(() => {
-        setJobId(null);
-      }, 2000);
+      const timer = setTimeout(() => setJobId(null), 2000);
       return () => clearTimeout(timer);
     }
   }, [isCompleted, isFailed, queryClient]);
 
   const validateFile = (file: File): string | null => {
     const extension = `.${file.name.split(".").pop()?.toLowerCase()}`;
-    const isValidType =
-      ACCEPTED_TYPES.includes(file.type) ||
-      ACCEPTED_EXTENSIONS.includes(extension);
-
-    if (!isValidType) {
-      return "Formato no válido. Solo se aceptan archivos CSV, XLSX o XLS.";
-    }
-
-    if (file.size > MAX_FILE_SIZE) {
-      return "El archivo excede el tamaño máximo de 10MB.";
-    }
-
+    const isValidType = ACCEPTED_TYPES.includes(file.type) || ACCEPTED_EXTENSIONS.includes(extension);
+    if (!isValidType) return "Solo se aceptan archivos CSV, XLSX o XLS.";
+    if (file.size > MAX_FILE_SIZE) return "El archivo excede el límite de 10MB.";
     return null;
   };
 
   const handleFile = async (file: File) => {
     const validationError = validateFile(file);
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
+    if (validationError) { setError(validationError); return; }
 
     setError(null);
     setJobId(null);
@@ -90,66 +75,38 @@ export function FileDropzone() {
       onSuccess: (response) => {
         clearInterval(progressInterval);
         setUploading(true, 100);
-        toast.success("Archivo subido correctamente. Procesando...");
+        toast.success("Archivo subido. Procesando...");
         setTimeout(() => {
           setUploading(false, 0);
-          if (response?.data?.jobId) {
-            setJobId(response.data.jobId);
-          }
+          if (response?.data?.jobId) setJobId(response.data.jobId);
         }, 500);
       },
       onError: () => {
         clearInterval(progressInterval);
         setError("Error al subir el archivo. Intenta de nuevo.");
-        toast.error("Error al subir el archivo. Intenta de nuevo.");
+        toast.error("Error al subir el archivo.");
         setUploading(false, 0);
       },
     });
   };
 
-  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  };
-
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); };
+  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); };
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-
+    e.preventDefault(); e.stopPropagation(); setIsDragging(false);
     const file = e.dataTransfer.files[0];
-    if (file) {
-      handleFile(file);
-    }
+    if (file) handleFile(file);
   };
-
-  const handleClick = () => {
-    if (!isUploading && jobId === null) {
-      fileInputRef.current?.click();
-    }
-  };
-
+  const handleClick = () => { if (!isUploading && jobId === null) fileInputRef.current?.click(); };
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      handleFile(file);
-    }
+    if (file) handleFile(file);
     e.target.value = "";
   };
-
-  const handleRetry = () => {
-    setJobId(null);
-    setError(null);
-  };
+  const handleRetry = () => { setJobId(null); setError(null); };
 
   const isProcessing = jobId !== null && !isCompleted && !isFailed;
+  const isIdle = !isUploading && !isProcessing && !isCompleted && !isFailed;
 
   return (
     <div
@@ -158,13 +115,15 @@ export function FileDropzone() {
       onDrop={handleDrop}
       onClick={handleClick}
       className={cn(
-        "bg-white rounded-[10px] border-2 border-dashed border-[#e2e8f0]",
-        "flex flex-col items-center justify-center p-12 text-center",
-        "h-full min-h-[300px] transition-colors",
-        isDragging && "border-[#ff6600] bg-[#fff0e6]",
-        !isDragging && !isUploading && jobId === null && "hover:border-[#ff6600] hover:bg-[#fff0e6] cursor-pointer",
-        (isUploading || isProcessing) && "cursor-not-allowed opacity-75",
-        (isCompleted || isFailed) && "cursor-default"
+        "bg-white rounded-xl border-2 border-dashed",
+        "flex flex-col items-center justify-center p-10 text-center",
+        "h-full min-h-[280px]",
+        "transition-[border-color,background-color] duration-150 ease-out",
+        isDragging
+          ? "border-[#ff6600] bg-[#fff8f4]"
+          : "border-[#ede8e1] hover:border-[#ff6600] hover:bg-[#fff8f4]",
+        (isUploading || isProcessing) && "cursor-not-allowed",
+        isIdle && "cursor-pointer"
       )}
     >
       <input
@@ -176,79 +135,98 @@ export function FileDropzone() {
         disabled={isUploading || isProcessing}
       />
 
-      {/* Estado: Subiendo */}
+      {/* Subiendo */}
       {isUploading && (
         <div className="flex flex-col items-center gap-4 w-full max-w-xs">
-          <div className="bg-[#ff6600] p-4 rounded-full mb-4">
-            <UploadCloud className="w-10 h-10 text-white animate-pulse" />
+          <div className="w-12 h-12 rounded-xl bg-[#fff0e6] flex items-center justify-center mb-2">
+            <UploadCloud className="w-6 h-6 text-[#ff6600] animate-pulse" strokeWidth={1.5} />
           </div>
-          <p className="text-xl font-bold text-[#1e293b]">Subiendo archivo...</p>
-          <ProgressBar value={uploadProgress} size="md" showLabel />
+          <p className="font-semibold text-[#1a1612] text-sm" style={{ fontFamily: "var(--font-sans)" }}>
+            Subiendo archivo...
+          </p>
+          <div className="w-full">
+            <ProgressBar value={uploadProgress} size="md" showLabel />
+          </div>
         </div>
       )}
 
-      {/* Estado: Procesando */}
+      {/* Procesando */}
       {!isUploading && isProcessing && (
-        <div className="flex flex-col items-center gap-4 w-full max-w-xs">
-          <div className="bg-[#ff6600] p-4 rounded-full mb-4">
-            <Loader2 className="w-10 h-10 text-white animate-spin" />
+        <div className="flex flex-col items-center gap-3 w-full max-w-xs">
+          <div className="w-12 h-12 rounded-xl bg-[#fff0e6] flex items-center justify-center mb-2">
+            <Loader2 className="w-6 h-6 text-[#ff6600] animate-spin" strokeWidth={1.5} />
           </div>
-          <p className="text-xl font-bold text-[#1e293b]">Procesando dataset...</p>
+          <p className="font-semibold text-[#1a1612] text-sm" style={{ fontFamily: "var(--font-sans)" }}>
+            Procesando dataset...
+          </p>
           {jobStatus && (
-            <span className="font-mono text-sm bg-[#f1f5f9] border border-[#e2e8f0] rounded-lg px-3 py-1 text-[#64748b]">
+            <span className="text-xs bg-[#f7f5f2] border border-[#ede8e1] rounded-lg px-3 py-1 text-[#6b6258]"
+              style={{ fontFamily: "var(--font-sans)" }}>
               {jobStatus}
             </span>
           )}
-          <p className="text-sm text-[#64748b] font-medium">Job: {jobId}</p>
         </div>
       )}
 
-      {/* Estado: Completado */}
+      {/* Completado */}
       {!isUploading && isCompleted && (
-        <div className="flex flex-col items-center gap-4 w-full max-w-xs">
-          <div className="bg-[#059669] p-4 rounded-full mb-4">
-            <CheckCircle className="w-10 h-10 text-white" />
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center mb-2">
+            <CheckCircle className="w-6 h-6 text-emerald-600" strokeWidth={1.5} />
           </div>
-          <p className="text-xl font-bold text-[#059669]">¡Dataset listo!</p>
+          <p className="font-semibold text-emerald-700 text-sm" style={{ fontFamily: "var(--font-sans)" }}>
+            ¡Dataset listo!
+          </p>
         </div>
       )}
 
-      {/* Estado: Fallido */}
+      {/* Fallido */}
       {!isUploading && isFailed && (
-        <div className="flex flex-col items-center gap-4 w-full max-w-xs">
-          <div className="bg-[#dc2626] p-4 rounded-full mb-4">
-            <XCircle className="w-10 h-10 text-white" />
+        <div className="flex flex-col items-center gap-3 w-full max-w-xs">
+          <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center mb-2">
+            <XCircle className="w-6 h-6 text-red-500" strokeWidth={1.5} />
           </div>
-          <p className="text-xl font-bold text-[#dc2626]">Error al procesar</p>
+          <p className="font-semibold text-red-600 text-sm" style={{ fontFamily: "var(--font-sans)" }}>
+            Error al procesar
+          </p>
           {jobError && (
-            <p className="text-sm text-red-600 font-medium">{jobError}</p>
+            <p className="text-xs text-red-500" style={{ fontFamily: "var(--font-sans)" }}>{jobError}</p>
           )}
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleRetry();
-            }}
-            className="w-full font-semibold py-3 px-6 rounded-lg bg-[#ff6600] text-white hover:bg-[#cc5200] hover:shadow-[0_4px_12px_rgba(255,102,0,.3)] active:scale-[0.98] transition-all duration-150"
+            onClick={(e) => { e.stopPropagation(); handleRetry(); }}
+            className="w-full py-2.5 px-5 rounded-xl bg-[#ff6600] text-white text-sm font-semibold
+              hover:bg-[#e55a00] active:scale-[0.97]
+              transition-[background-color,transform] duration-150 ease-out"
+            style={{ fontFamily: "var(--font-sans)" }}
           >
             Reintentar
           </button>
         </div>
       )}
 
-      {/* Estado: Idle */}
-      {!isUploading && !isProcessing && !isCompleted && !isFailed && (
+      {/* Idle */}
+      {isIdle && (
         <>
-          <div className="bg-[#ff6600] p-4 rounded-full mb-4">
-            <UploadCloud className="w-10 h-10 text-white" />
+          <div className="w-12 h-12 rounded-xl bg-[#fff0e6] flex items-center justify-center mb-4">
+            <UploadCloud className="w-6 h-6 text-[#ff6600]" strokeWidth={1.5} />
           </div>
-          <h3 className="text-lg font-bold text-[#1e293b] mb-2">Arrastra tu Excel aquí</h3>
-          <p className="font-medium text-[#64748b] mb-6">
+          <h3
+            className="text-sm font-semibold text-[#1a1612] mb-1"
+            style={{ fontFamily: "var(--font-sans)" }}
+          >
+            Arrastra tu Excel aquí
+          </h3>
+          <p className="text-xs text-[#6b6258] mb-6" style={{ fontFamily: "var(--font-sans)" }}>
             Máximo 50,000 registros (.xlsx)
           </p>
           <button
             type="button"
-            className="font-semibold py-3 px-6 rounded-lg bg-[#ff6600] text-white hover:bg-[#cc5200] hover:shadow-[0_4px_12px_rgba(255,102,0,.3)] active:scale-[0.98] transition-all duration-150 w-full"
+            className="w-full py-2.5 px-5 rounded-xl bg-[#ff6600] text-white text-sm font-semibold
+              hover:bg-[#e55a00] hover:shadow-[0_4px_16px_rgba(255,102,0,.3)]
+              active:scale-[0.97]
+              transition-[background-color,box-shadow,transform] duration-150 ease-out"
+            style={{ fontFamily: "var(--font-sans)" }}
           >
             Seleccionar Archivo
           </button>
@@ -256,7 +234,9 @@ export function FileDropzone() {
       )}
 
       {error && !isFailed && (
-        <p className="mt-4 text-sm text-red-600 font-medium">{error}</p>
+        <p className="mt-4 text-xs text-red-500 font-medium" style={{ fontFamily: "var(--font-sans)" }}>
+          {error}
+        </p>
       )}
     </div>
   );

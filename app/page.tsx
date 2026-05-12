@@ -15,7 +15,7 @@ import {
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col bg-[#F4F4F5]">
+    <div className="min-h-screen flex flex-col bg-[#f7f5f2]">
       <LandingHeader />
       <main className="flex-1 flex flex-col">
         <HeroSection />

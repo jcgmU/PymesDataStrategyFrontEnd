@@ -2,46 +2,6 @@
 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { useStats } from '@/hooks/useStats'
-import { cn } from '@/lib/utils'
-
-function MetricCard({
-  label,
-  value,
-  accent = false,
-}: {
-  label: string
-  value: string | number
-  accent?: boolean
-}) {
-  return (
-    <div
-      className={cn(
-        "bg-white rounded-[10px] p-5",
-        "shadow-[0_1px_3px_rgba(0,0,0,.08)]",
-        "border-l-4",
-        accent ? "border-[#ff6600]" : "border-[#059669]"
-      )}
-    >
-      <p className="text-xs font-medium text-[#64748b] uppercase tracking-wide mb-1">{label}</p>
-      <p className="text-2xl font-bold text-[#1e293b]">{value}</p>
-    </div>
-  )
-}
-
-function MetricsSkeleton() {
-  return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div
-            key={i}
-            className="bg-white rounded-[10px] shadow-[0_1px_3px_rgba(0,0,0,.08)] p-5 animate-pulse h-24"
-          />
-        ))}
-      </div>
-    </div>
-  )
-}
 
 function formatTime(ms: number | undefined | null): string {
   if (ms == null || isNaN(ms) || ms === 0) return '—'
@@ -49,55 +9,93 @@ function formatTime(ms: number | undefined | null): string {
   return `${(ms / 1000).toFixed(1)}s`
 }
 
+function MetricsSkeleton() {
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-px bg-[#ede8e1] rounded-xl overflow-hidden mb-6">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="bg-white p-5 animate-pulse h-20" />
+      ))}
+    </div>
+  )
+}
+
 export function MetricsBand() {
   const { data, isLoading, isError } = useStats()
-
-  console.log('MetricsBand data received from hook:', data)
 
   if (isLoading) return <MetricsSkeleton />
 
   if (isError || !data) {
     return (
-      <div className="bg-white rounded-[10px] shadow-[0_1px_3px_rgba(0,0,0,.08)] p-4 text-center text-red-600 font-medium">
+      <div className="bg-white rounded-xl border border-[#ede8e1] p-4 text-center text-sm text-[#dc2626] mb-6"
+        style={{ fontFamily: "var(--font-sans)" }}>
         No se pudieron cargar las métricas.
       </div>
     )
   }
 
+  const metrics = [
+    { label: "Total Datasets", value: data.totalDatasets, accent: true },
+    { label: "Total Jobs", value: data.totalJobs, accent: true },
+    { label: "Completados", value: data.jobsCompleted },
+    { label: "Fallidos", value: data.jobsFailed },
+    { label: "T. Promedio", value: formatTime(data.avgProcessingTimeMs) },
+    { label: "Pendientes", value: data.pendingReviews },
+  ]
+
   const chartData = [
-    { name: 'Completados', value: data.jobsCompleted, color: '#16a34a' },
+    { name: 'Completados', value: data.jobsCompleted, color: '#059669' },
     { name: 'Fallidos', value: data.jobsFailed, color: '#dc2626' },
   ]
 
   return (
-    <div className="space-y-4 mb-8">
-      {/* Título sección */}
-      <h3 className="text-base font-semibold text-[#1e293b]">
-        Métricas del Sistema
-      </h3>
+    <div className="space-y-4">
 
-      {/* Tarjetas */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <MetricCard label="Total Datasets" value={data.totalDatasets} accent />
-        <MetricCard label="Total Jobs" value={data.totalJobs} accent />
-        <MetricCard label="Jobs Completados" value={data.jobsCompleted} />
-        <MetricCard label="Jobs Fallidos" value={data.jobsFailed} />
-        <MetricCard label="Tiempo Promedio" value={formatTime(data.avgProcessingTimeMs)} />
-        <MetricCard label="Revisiones Pendientes" value={data.pendingReviews} />
+      {/* Métricas en grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-px bg-[#ede8e1] rounded-xl overflow-hidden">
+        {metrics.map(({ label, value, accent }) => (
+          <div key={label} className="bg-white px-5 py-4">
+            <p
+              className="text-[10px] font-semibold text-[#6b6258] tracking-widest uppercase mb-1"
+              style={{ fontFamily: "var(--font-sans)" }}
+            >
+              {label}
+            </p>
+            <p
+              className="text-2xl font-bold"
+              style={{
+                fontFamily: "var(--font-display)",
+                color: accent ? "#ff6600" : "#1a1612",
+              }}
+            >
+              {value}
+            </p>
+          </div>
+        ))}
       </div>
 
-      {/* Chart Jobs */}
-      <div className="bg-white rounded-[10px] shadow-[0_1px_3px_rgba(0,0,0,.08)] p-4">
-        <p className="text-sm font-semibold text-[#1e293b] mb-3">Jobs ETL — Completados vs Fallidos</p>
-        <ResponsiveContainer width="100%" height={120}>
-          <BarChart data={chartData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-            <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-            <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+      {/* Chart */}
+      <div className="bg-white rounded-xl border border-[#ede8e1] px-5 py-4">
+        <p
+          className="text-xs font-semibold text-[#1a1612] mb-3"
+          style={{ fontFamily: "var(--font-sans)" }}
+        >
+          Jobs ETL — Completados vs Fallidos
+        </p>
+        <ResponsiveContainer width="100%" height={100}>
+          <BarChart data={chartData} margin={{ top: 0, right: 0, left: -28, bottom: 0 }}>
+            <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#6b6258", fontFamily: "var(--font-sans)" }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 10, fill: "#9c9189", fontFamily: "var(--font-sans)" }} allowDecimals={false} axisLine={false} tickLine={false} />
             <Tooltip
               formatter={(value) => [value as number, 'Jobs']}
-              contentStyle={{ border: '1px solid #e2e8f0', borderRadius: '8px' }}
+              contentStyle={{
+                border: '1px solid #ede8e1',
+                borderRadius: '10px',
+                fontSize: '12px',
+                fontFamily: "var(--font-sans)",
+              }}
+              cursor={{ fill: '#f7f5f2' }}
             />
-            <Bar dataKey="value" radius={4}>
+            <Bar dataKey="value" radius={4} maxBarSize={40}>
               {chartData.map((entry, index) => (
                 <Cell key={index} fill={entry.color} />
               ))}

@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { loginSchema } from '@/lib/schemas'
 import type { LoginFormData } from '@/lib/schemas'
 import { LogoMark } from '@/components/ui'
+import { ArrowRight, AlertCircle } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -58,28 +59,53 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="w-full max-w-sm bg-white rounded-2xl p-9 shadow-[0_4px_6px_rgba(0,0,0,.07),0_10px_30px_rgba(0,0,0,.06)]">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <LogoMark size={32} color="#ff6600" />
-        <span className="text-xl font-bold text-[#1e293b]">PYMES-AI</span>
+    <div
+      className="w-full max-w-[400px] animate-fade-up"
+      style={{ fontFamily: "var(--font-sans)" }}
+    >
+      {/* Logo — mobile only */}
+      <div className="flex items-center gap-2.5 mb-10 md:hidden">
+        <LogoMark size={26} color="#ff6600" />
+        <span
+          className="font-bold text-base text-[#1a1612]"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          PYMES-AI
+        </span>
       </div>
-      <h2 className="text-[22px] font-bold text-[#1e293b] mb-6">Iniciar sesión</h2>
 
-      {/* Server error */}
+      {/* Encabezado */}
+      <div className="mb-8 animate-fade-up animate-delay-100">
+        <h2
+          className="text-[#1a1612] mb-1.5 leading-tight"
+          style={{ fontFamily: "var(--font-display)", fontSize: "2rem", fontWeight: 700 }}
+        >
+          Bienvenido de nuevo
+        </h2>
+        <p className="text-[#6b6258] text-sm">
+          Ingresa tus credenciales para continuar.
+        </p>
+      </div>
+
+      {/* Error de servidor */}
       {serverError && (
         <div
           role="alert"
-          className="mb-4 p-3 bg-[#fee2e2] rounded-lg text-[#dc2626] text-sm font-medium"
+          className="mb-6 flex items-start gap-3 p-4 bg-[#fff0ee] rounded-xl border border-[#ffd0c8]"
         >
-          {serverError}
+          <AlertCircle size={16} className="text-[#dc2626] shrink-0 mt-0.5" strokeWidth={2} />
+          <p className="text-sm font-medium text-[#dc2626]">{serverError}</p>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} noValidate className="space-y-4">
+      <form onSubmit={handleSubmit} noValidate className="space-y-5 animate-fade-up animate-delay-200">
+
         {/* Email */}
         <div>
-          <label htmlFor="email" className="block font-medium text-sm text-[#1e293b] mb-1">
+          <label
+            htmlFor="email"
+            className="block text-xs font-semibold text-[#1a1612] tracking-wide uppercase mb-2"
+          >
             Correo electrónico
           </label>
           <input
@@ -90,16 +116,21 @@ export default function LoginPage() {
             value={formData.email}
             onChange={handleChange}
             placeholder="tu@correo.com"
-            className="w-full border border-[#e2e8f0] rounded-lg px-3 py-2 text-[#1e293b] focus:outline-none focus:border-[#ff6600] focus:ring-[3px] focus:ring-[rgba(255,102,0,.12)] transition-all"
+            className="w-full bg-white border border-[#ede8e1] rounded-xl px-4 py-3 text-sm text-[#1a1612] placeholder:text-[#c4bdb5]
+              focus:outline-none focus:border-[#ff6600] focus:ring-[3px] focus:ring-[rgba(255,102,0,.10)]
+              transition-[border-color,box-shadow] duration-150 ease-out"
           />
           {errors.email && (
-            <p className="mt-1 text-sm font-medium text-red-600">{errors.email}</p>
+            <p className="mt-1.5 text-xs font-medium text-[#dc2626]">{errors.email}</p>
           )}
         </div>
 
         {/* Password */}
         <div>
-          <label htmlFor="password" className="block font-medium text-sm text-[#1e293b] mb-1">
+          <label
+            htmlFor="password"
+            className="block text-xs font-semibold text-[#1a1612] tracking-wide uppercase mb-2"
+          >
             Contraseña
           </label>
           <input
@@ -110,10 +141,12 @@ export default function LoginPage() {
             value={formData.password}
             onChange={handleChange}
             placeholder="••••••••"
-            className="w-full border border-[#e2e8f0] rounded-lg px-3 py-2 text-[#1e293b] focus:outline-none focus:border-[#ff6600] focus:ring-[3px] focus:ring-[rgba(255,102,0,.12)] transition-all"
+            className="w-full bg-white border border-[#ede8e1] rounded-xl px-4 py-3 text-sm text-[#1a1612] placeholder:text-[#c4bdb5]
+              focus:outline-none focus:border-[#ff6600] focus:ring-[3px] focus:ring-[rgba(255,102,0,.10)]
+              transition-[border-color,box-shadow] duration-150 ease-out"
           />
           {errors.password && (
-            <p className="mt-1 text-sm font-medium text-red-600">{errors.password}</p>
+            <p className="mt-1.5 text-xs font-medium text-[#dc2626]">{errors.password}</p>
           )}
         </div>
 
@@ -121,16 +154,35 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full mt-2 bg-[#ff6600] text-white font-semibold py-2.5 rounded-lg hover:bg-[#cc5200] hover:shadow-[0_4px_12px_rgba(255,102,0,.3)] active:scale-[0.98] transition-all duration-150 disabled:opacity-55 disabled:cursor-not-allowed"
+          className="group w-full mt-2 flex items-center justify-center gap-2
+            bg-[#ff6600] text-white font-semibold py-3 rounded-xl
+            hover:bg-[#e55a00] hover:shadow-[0_8px_24px_rgba(255,102,0,.35)]
+            active:scale-[0.97] transition-[background-color,box-shadow,transform] duration-150 ease-out
+            disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isLoading ? 'Ingresando...' : 'Ingresar'}
+          {isLoading ? (
+            <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : (
+            <>
+              Ingresar
+              <ArrowRight
+                size={16}
+                strokeWidth={2.5}
+                className="transition-transform duration-150 ease-out group-hover:translate-x-0.5"
+              />
+            </>
+          )}
         </button>
+
       </form>
 
       {/* Footer */}
-      <p className="mt-6 text-center text-sm text-[#64748b]">
+      <p className="mt-8 text-center text-sm text-[#6b6258] animate-fade-up animate-delay-300">
         ¿No tienes cuenta?{' '}
-        <Link href="/register" className="font-semibold text-[#ff6600] hover:text-[#cc5200] transition-colors">
+        <Link
+          href="/register"
+          className="font-semibold text-[#1a1612] hover:text-[#ff6600] transition-colors duration-150 ease-out"
+        >
           Regístrate
         </Link>
       </p>

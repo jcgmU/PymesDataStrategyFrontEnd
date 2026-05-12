@@ -1,0 +1,85 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - link "Data Strategy" [ref=e5] [cursor=pointer]:
+        - /url: /dashboard
+        - heading "Data Strategy" [level=1] [ref=e6]:
+          - text: Data
+          - text: Strategy
+      - navigation [ref=e7]:
+        - link "Dashboard" [ref=e8] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e9]
+          - text: Dashboard
+        - link "Configuración" [ref=e14] [cursor=pointer]:
+          - /url: /dashboard/settings
+          - img [ref=e15]
+          - text: Configuración
+      - button "Cerrar Sesión" [ref=e19]:
+        - img [ref=e20]
+        - text: Cerrar Sesión
+    - generic [ref=e23]:
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - heading "Panel de Control" [level=2] [ref=e26]
+          - paragraph [ref=e27]: Sube tus archivos Excel para análisis estructurado.
+        - generic [ref=e28]: Administrador
+      - generic [ref=e29]:
+        - heading "Métricas del Sistema" [level=3] [ref=e30]
+        - generic [ref=e31]:
+          - generic [ref=e32]:
+            - paragraph [ref=e33]: Total Datasets
+            - paragraph
+          - generic [ref=e34]:
+            - paragraph [ref=e35]: Este Mes
+            - paragraph
+          - generic [ref=e36]:
+            - paragraph [ref=e37]: Jobs Completados
+            - paragraph
+          - generic [ref=e38]:
+            - paragraph [ref=e39]: Jobs Fallidos
+            - paragraph
+          - generic [ref=e40]:
+            - paragraph [ref=e41]: Tiempo Promedio
+            - paragraph [ref=e42]: NaNs
+          - generic [ref=e43]:
+            - paragraph [ref=e44]: Revisiones Pendientes
+            - paragraph
+        - generic [ref=e45]:
+          - paragraph [ref=e46]: Jobs ETL — Completados vs Fallidos
+          - application [ref=e49]:
+            - generic [ref=e55]:
+              - generic [ref=e57]: Completados
+              - generic [ref=e59]: Fallidos
+      - generic [ref=e60]:
+        - generic [ref=e62] [cursor=pointer]:
+          - img [ref=e64]
+          - heading "Arrastra tu Excel aquí" [level=3] [ref=e67]
+          - paragraph [ref=e68]: Máximo 50,000 registros (.xlsx)
+          - button "Seleccionar Archivo" [ref=e69]
+        - generic [ref=e70]:
+          - heading "Archivos Recientes" [level=3] [ref=e71]:
+            - img [ref=e72]
+            - text: Archivos Recientes
+          - generic [ref=e75]:
+            - generic [ref=e76]:
+              - generic [ref=e77]:
+                - img [ref=e78]
+                - textbox "Buscar por nombre..." [ref=e81]
+              - combobox [ref=e82] [cursor=pointer]:
+                - option "Todos los estados" [selected]
+                - option "Pendiente"
+                - option "Procesando"
+                - option "Listo"
+                - option "Error"
+                - option "Archivado"
+            - paragraph [ref=e84]: No hay datasets cargados
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e90] [cursor=pointer]:
+    - img [ref=e91]
+  - alert [ref=e94]
+  - generic [ref=e95]: Completados
+```
